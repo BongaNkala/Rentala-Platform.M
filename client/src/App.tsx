@@ -7,6 +7,10 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Properties from "./pages/Properties";
+import Units from "./pages/Units";
+import Tenants from "./pages/Tenants";
+import Leases from "./pages/Leases";
+import Payments from "./pages/Payments";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -38,6 +42,10 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/dashboard"} component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path={"/properties"} component={() => <ProtectedRoute component={Properties} />} />
+      <Route path={"/units"} component={() => <ProtectedRoute component={Units} />} />
+      <Route path={"/tenants"} component={() => <ProtectedRoute component={Tenants} />} />
+      <Route path={"/leases"} component={() => <ProtectedRoute component={Leases} />} />
+      <Route path={"/payments"} component={() => <ProtectedRoute component={Payments} />} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

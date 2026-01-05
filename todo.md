@@ -208,14 +208,15 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Create Sidebar navigation component
 - [x] Create Dashboard overview page
 - [x] Create Properties list view component
-- [ ] Create Units management view component
-- [ ] Create Tenants management view component
-- [ ] Create Leases management view component
-- [ ] Create Payments tracking view component
+- [x] Create Units management view component
+- [x] Create Tenants management view component
+- [x] Create Leases management view component
+- [x] Create Payments tracking view component
 - [ ] Create Maintenance requests view component
 - [ ] Create Inspections view component
 - [x] Migrate CSS to Tailwind + glassmorphism styles
-- [x] Connect Properties component to tRPC APIs
+- [x] Connect all components to tRPC APIs
 - [x] Implement loading and error states
 - [x] Add authentication protection to routes
-- [ ] Test all views with real data
+- [x] Update App.tsx with all routes
+- [x] Test all views with real data

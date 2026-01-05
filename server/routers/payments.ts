@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, inArray } from "drizzle-orm";
 import { payments, leases, units, properties, tenants } from "../../drizzle/schema";
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
@@ -25,6 +25,41 @@ const recordPaymentSchema = z.object({
 });
 
 export const paymentsRouter = router({
+  // List all payments for the current user's properties
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+
+    // Get all properties owned by the user
+    const userProperties = await db
+      .select()
+      .from(properties)
+      .where(eq(properties.ownerId, ctx.user!.id));
+
+    const propertyIds = userProperties.map(p => p.id);
+
+    if (propertyIds.length === 0) {
+      return [];
+    }
+
+    // Get all leases for user's properties
+    const userLeases = await db
+      .select()
+      .from(leases)
+      .where(inArray(leases.propertyId, propertyIds));
+
+    const leaseIds = userLeases.map(l => l.id);
+
+    if (leaseIds.length === 0) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(payments)
+      .where(inArray(payments.leaseId, leaseIds));
+  }),
+
   // List all payments for a property
   listByProperty: protectedProcedure
     .input(z.object({ propertyId: z.number().int().positive() }))

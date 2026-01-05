@@ -1,4 +1,4 @@
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, inArray } from "drizzle-orm";
 import { leases, units, properties, tenants } from "../../drizzle/schema";
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
@@ -23,6 +23,29 @@ const updateLeaseSchema = createLeaseSchema.partial().extend({
 });
 
 export const leasesRouter = router({
+  // List all leases for the current user's properties
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+
+    // Get all properties owned by the user
+    const userProperties = await db
+      .select()
+      .from(properties)
+      .where(eq(properties.ownerId, ctx.user!.id));
+
+    const propertyIds = userProperties.map(p => p.id);
+
+    if (propertyIds.length === 0) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(leases)
+      .where(inArray(leases.propertyId, propertyIds));
+  }),
+
   // List all active leases
   listActive: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
