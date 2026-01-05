@@ -260,3 +260,29 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Test PDF generation and download
 - [x] Add unit tests for PDF export router
 - [x] All tests passing (10/10)
+
+
+## Phase 2: Automated Email Notifications
+
+### Notification Service
+- [x] Create email notification service with template support
+- [x] Implement overdue rent notification emails
+- [x] Implement lease expiration warning emails
+- [x] Implement maintenance completion notification emails
+- [x] Add email configuration and SMTP setup
+
+### Scheduled Tasks
+- [x] Set up job scheduler for daily notification checks
+- [x] Implement overdue rent detection (7, 14, 30 days)
+- [x] Implement lease expiration alerts (30, 14, 7 days before)
+- [x] Add notification history tracking
+- [x] Implement email retry logic for failed sends
+
+### Notification Triggers
+- [x] Add overdue payment detection to payments router
+- [x] Add lease expiration check to leases router
+- [x] Add maintenance completion notification to maintenance router
+- [x] Create notifications router for manual triggers
+- [x] Add unit tests for notifications (5 tests passing)
+- [ ] Implement notification preferences per user - Phase 3
+- [ ] Add opt-in/opt-out functionality - Phase 3
