@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { maintenanceRequests, units, properties } from "../../drizzle/schema";
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
@@ -23,6 +23,29 @@ const updateMaintenanceSchema = createMaintenanceSchema.partial().extend({
 });
 
 export const maintenanceRouter = router({
+  // List all maintenance requests for the current user's properties
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+
+    // Get all properties owned by the user
+    const userProperties = await db
+      .select()
+      .from(properties)
+      .where(eq(properties.ownerId, ctx.user!.id));
+
+    const propertyIds = userProperties.map(p => p.id);
+
+    if (propertyIds.length === 0) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(maintenanceRequests)
+      .where(inArray(maintenanceRequests.propertyId, propertyIds));
+  }),
+
   // List all maintenance requests for a property
   listByProperty: protectedProcedure
     .input(z.object({ propertyId: z.number().int().positive() }))

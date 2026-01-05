@@ -11,6 +11,8 @@ import Units from "./pages/Units";
 import Tenants from "./pages/Tenants";
 import Leases from "./pages/Leases";
 import Payments from "./pages/Payments";
+import Maintenance from "./pages/Maintenance";
+import Inspections from "./pages/Inspections";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -46,6 +48,8 @@ function Router() {
       <Route path={"/tenants"} component={() => <ProtectedRoute component={Tenants} />} />
       <Route path={"/leases"} component={() => <ProtectedRoute component={Leases} />} />
       <Route path={"/payments"} component={() => <ProtectedRoute component={Payments} />} />
+      <Route path={"/maintenance"} component={() => <ProtectedRoute component={Maintenance} />} />
+      <Route path={"/inspections"} component={() => <ProtectedRoute component={Inspections} />} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

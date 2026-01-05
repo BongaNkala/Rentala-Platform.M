@@ -212,8 +212,8 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Create Tenants management view component
 - [x] Create Leases management view component
 - [x] Create Payments tracking view component
-- [ ] Create Maintenance requests view component
-- [ ] Create Inspections view component
+- [x] Create Maintenance requests view component
+- [x] Create Inspections view component
 - [x] Migrate CSS to Tailwind + glassmorphism styles
 - [x] Connect all components to tRPC APIs
 - [x] Implement loading and error states
