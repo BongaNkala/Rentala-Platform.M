@@ -286,3 +286,34 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Add unit tests for notifications (5 tests passing)
 - [ ] Implement notification preferences per user - Phase 3
 - [ ] Add opt-in/opt-out functionality - Phase 3
+
+
+## Phase 2 (Continued): SMS Notifications
+
+### SMS Service Setup
+- [x] Integrate Twilio for SMS delivery
+- [x] Create SMS service with Twilio client
+- [x] Implement SMS templates for critical alerts
+- [x] Add phone number validation
+- [x] Configure SMS retry logic
+
+### SMS Notification Templates
+- [x] Create overdue rent SMS template
+- [x] Create lease expiration SMS template
+- [x] Create maintenance completion SMS template
+- [x] Create payment reminder SMS template
+- [x] Ensure SMS length optimization (160 characters)
+
+### SMS Scheduler Integration
+- [x] Add SMS sending to overdue rent detection
+- [x] Add SMS sending to lease expiration checks
+- [x] Implement SMS rate limiting
+- [x] Add SMS notification history tracking
+- [x] Create SMS notification router
+- [x] Add unit tests for SMS notifications (7 tests passing)
+
+### SMS Configuration
+- [x] Add Twilio credentials to environment variables
+- [ ] Implement SMS enable/disable toggle per user - Phase 3
+- [ ] Add phone number management UI - Phase 3
+- [ ] Create SMS notification preferences - Phase 3

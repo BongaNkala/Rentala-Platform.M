@@ -12,6 +12,7 @@ import { inspectionsRouter } from "./routers/inspections";
 import { accountingRouter } from "./routers/accounting";
 import { pdfExportRouter } from "./routers/pdfExport";
 import { notificationsRouter } from "./routers/notifications";
+import { smsNotificationsRouter } from "./routers/smsNotifications";
 
 export const appRouter = router({
   // Core system routes
@@ -40,6 +41,7 @@ export const appRouter = router({
   accounting: accountingRouter,
   pdfExport: pdfExportRouter,
   notifications: notificationsRouter,
+  smsNotifications: smsNotificationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -3,6 +3,7 @@ import { eq, and, lt, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { payments, leases, tenants, users, properties } from "../../drizzle/schema";
 import { sendEmail, emailTemplates, sendBulkEmails } from "./emailService";
+import { sendSMS, smsTemplates, sendBulkSMS, formatPhoneNumber } from "./smsService";
 
 let schedulerRunning = false;
 
@@ -60,16 +61,17 @@ async function checkOverdueRents() {
       );
 
     const emailsToSend: Array<{ email: string; template: any }> = [];
+    const smssToSend: Array<{ phoneNumber: string; template: any }> = [];
 
     for (const record of overduePayments) {
       const daysOverdue = Math.floor(
         (today.getTime() - new Date(record.payment.dueDate).getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      // Send email every 7, 14, and 30 days
+      // Send notifications every 7, 14, and 30 days
       if (daysOverdue === 7 || daysOverdue === 14 || daysOverdue === 30) {
         if (record.tenant.email) {
-          const template = emailTemplates.overdueRent(
+          const emailTemplate = emailTemplates.overdueRent(
             record.tenant.firstName || "Tenant",
             record.property.name,
             parseFloat(record.payment.amount.toString()),
@@ -78,7 +80,22 @@ async function checkOverdueRents() {
 
           emailsToSend.push({
             email: record.tenant.email,
-            template,
+            template: emailTemplate,
+          });
+        }
+
+        // Send SMS if phone number is available
+        if (record.tenant.phone) {
+          const smsTemplate = smsTemplates.overdueRent(
+            record.tenant.firstName || "Tenant",
+            record.property.name,
+            parseFloat(record.payment.amount.toString()),
+            daysOverdue
+          );
+
+          smssToSend.push({
+            phoneNumber: formatPhoneNumber(record.tenant.phone),
+            template: smsTemplate,
           });
         }
       }
@@ -86,7 +103,12 @@ async function checkOverdueRents() {
 
     if (emailsToSend.length > 0) {
       const sent = await sendBulkEmails(emailsToSend, { delayMs: 500 });
-      console.log(`[Scheduler] Sent ${sent} overdue rent notifications`);
+      console.log(`[Scheduler] Sent ${sent} overdue rent email notifications`);
+    }
+
+    if (smssToSend.length > 0) {
+      const sent = await sendBulkSMS(smssToSend, { delayMs: 500 });
+      console.log(`[Scheduler] Sent ${sent} overdue rent SMS notifications`);
     }
   } catch (error) {
     console.error("[Scheduler] Error checking overdue rents:", error);
@@ -121,16 +143,17 @@ async function checkLeaseExpirations() {
       );
 
     const emailsToSend: Array<{ email: string; template: any }> = [];
+    const smssToSend: Array<{ phoneNumber: string; template: any }> = [];
 
     for (const record of expiringLeases) {
       const daysUntilExpiration = Math.floor(
         (new Date(record.lease.endDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      // Send email 30, 14, and 7 days before expiration
+      // Send notifications 30, 14, and 7 days before expiration
       if (daysUntilExpiration === 30 || daysUntilExpiration === 14 || daysUntilExpiration === 7) {
         if (record.tenant.email) {
-          const template = emailTemplates.leaseExpiration(
+          const emailTemplate = emailTemplates.leaseExpiration(
             record.tenant.firstName || "Tenant",
             record.property.name,
             new Date(record.lease.endDate).toLocaleDateString(),
@@ -139,7 +162,21 @@ async function checkLeaseExpirations() {
 
           emailsToSend.push({
             email: record.tenant.email,
-            template,
+            template: emailTemplate,
+          });
+        }
+
+        // Send SMS if phone number is available
+        if (record.tenant.phone) {
+          const smsTemplate = smsTemplates.leaseExpiration(
+            record.tenant.firstName || "Tenant",
+            record.property.name,
+            daysUntilExpiration
+          );
+
+          smssToSend.push({
+            phoneNumber: formatPhoneNumber(record.tenant.phone),
+            template: smsTemplate,
           });
         }
       }
@@ -147,7 +184,12 @@ async function checkLeaseExpirations() {
 
     if (emailsToSend.length > 0) {
       const sent = await sendBulkEmails(emailsToSend, { delayMs: 500 });
-      console.log(`[Scheduler] Sent ${sent} lease expiration notifications`);
+      console.log(`[Scheduler] Sent ${sent} lease expiration email notifications`);
+    }
+
+    if (smssToSend.length > 0) {
+      const sent = await sendBulkSMS(smssToSend, { delayMs: 500 });
+      console.log(`[Scheduler] Sent ${sent} lease expiration SMS notifications`);
     }
   } catch (error) {
     console.error("[Scheduler] Error checking lease expirations:", error);
