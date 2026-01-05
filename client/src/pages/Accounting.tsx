@@ -1,17 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
 import RentalaLayout from '@/components/RentalaLayout';
 import { trpc } from '@/lib/trpc';
-import { Plus, TrendingUp, TrendingDown, DollarSign, PieChart, Download, Filter } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, PieChart, Download, Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 export default function Accounting() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [selectedProperty, setSelectedProperty] = useState<string>('');
-  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     propertyId: '',
     type: 'income' as const,
     category: 'rent',
@@ -20,6 +20,8 @@ export default function Accounting() {
     date: new Date().toISOString().split('T')[0],
     reference: '',
   });
+
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   // Fetch transactions
   const { data: transactions, isLoading: transactionsLoading, refetch: refetchTransactions } = trpc.accounting.list.useQuery({
@@ -43,6 +45,37 @@ export default function Accounting() {
 
   // Fetch properties for dropdown
   const { data: properties } = trpc.properties.list.useQuery();
+
+  // Export PDF mutation
+  const exportPdfMutation = trpc.pdfExport.exportFinancialStatement.useMutation();
+
+  const handleExportPdf = async (period: 'monthly' | 'quarterly' | 'annual') => {
+    try {
+      setIsExporting(true);
+      const pdfBuffer = await exportPdfMutation.mutateAsync({
+        propertyId: selectedProperty ? parseInt(selectedProperty) : undefined,
+        startDate,
+        endDate,
+        period,
+      });
+
+      // Create blob and download
+      const blob = new Blob([new Uint8Array(pdfBuffer as any)], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `financial-statement-${period}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+      alert('Failed to export financial statement');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Create transaction mutation
   const createMutation = trpc.accounting.create.useMutation({
@@ -164,10 +197,35 @@ export default function Accounting() {
             Add Transaction
           </Button>
 
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
-            <Download size={20} />
-            Export
-          </Button>
+          <div className="relative group">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2" disabled={isExporting}>
+              {isExporting ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
+              Export
+            </Button>
+            <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-white/20 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <button
+                onClick={() => handleExportPdf('monthly')}
+                disabled={isExporting}
+                className="block w-full text-left px-4 py-2 text-white hover:bg-white/10 first:rounded-t-lg"
+              >
+                Monthly Statement
+              </button>
+              <button
+                onClick={() => handleExportPdf('quarterly')}
+                disabled={isExporting}
+                className="block w-full text-left px-4 py-2 text-white hover:bg-white/10"
+              >
+                Quarterly Statement
+              </button>
+              <button
+                onClick={() => handleExportPdf('annual')}
+                disabled={isExporting}
+                className="block w-full text-left px-4 py-2 text-white hover:bg-white/10 last:rounded-b-lg"
+              >
+                Annual Statement
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

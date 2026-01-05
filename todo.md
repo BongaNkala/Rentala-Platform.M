@@ -240,3 +240,23 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Add transaction categorization UI
 - [x] Add Accounting route to App.tsx
 - [ ] Build financial statements export (PDF/CSV) - Phase 2
+
+
+## Phase 1 (Continued): PDF Export for Financial Statements
+
+### PDF Export Router & API
+- [x] Create PDF export router with financial statement generation
+- [x] Implement monthly financial statement PDF generation
+- [x] Implement quarterly financial statement PDF generation
+- [x] Implement annual financial statement PDF generation
+- [x] Add property-specific financial statement export
+- [x] Include transaction details in PDF
+
+### Accounting Page PDF Export
+- [x] Add export button to Accounting page
+- [x] Implement monthly export functionality
+- [x] Implement quarterly export functionality
+- [x] Implement annual export functionality
+- [x] Test PDF generation and download
+- [x] Add unit tests for PDF export router
+- [x] All tests passing (10/10)
