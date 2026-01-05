@@ -14,6 +14,8 @@ import Payments from "./pages/Payments";
 import Maintenance from "./pages/Maintenance";
 import Inspections from "./pages/Inspections";
 import Accounting from "./pages/Accounting";
+import RoleAwareDashboard from "./pages/RoleAwareDashboard";
+import RoleBasedLayout from "./components/RoleBasedLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -36,14 +38,18 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     return <NotFound />;
   }
 
-  return <Component />;
+  return (
+    <RoleBasedLayout>
+      <Component />
+    </RoleBasedLayout>
+  );
 }
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/dashboard"} component={() => <ProtectedRoute component={Dashboard} />} />
+      <Route path={"/dashboard"} component={() => <ProtectedRoute component={RoleAwareDashboard} />} />
       <Route path={"/properties"} component={() => <ProtectedRoute component={Properties} />} />
       <Route path={"/units"} component={() => <ProtectedRoute component={Units} />} />
       <Route path={"/tenants"} component={() => <ProtectedRoute component={Tenants} />} />
