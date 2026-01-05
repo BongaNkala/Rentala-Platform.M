@@ -9,6 +9,7 @@ import { leasesRouter } from "./routers/leases";
 import { paymentsRouter } from "./routers/payments";
 import { maintenanceRouter } from "./routers/maintenance";
 import { inspectionsRouter } from "./routers/inspections";
+import { accountingRouter } from "./routers/accounting";
 
 export const appRouter = router({
   // Core system routes
@@ -34,6 +35,7 @@ export const appRouter = router({
   payments: paymentsRouter,
   maintenance: maintenanceRouter,
   inspections: inspectionsRouter,
+  accounting: accountingRouter,
 });
 
 export type AppRouter = typeof appRouter;
