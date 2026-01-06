@@ -373,3 +373,18 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Test permission enforcement
 - [x] All TypeScript errors resolved
 - [x] Dev server running successfully
+
+## Phase 4: Home Page & GitHub Publication
+
+### Home Page Redirect
+- [x] Update Home page to redirect authenticated users to dashboard
+- [x] Redirect unauthenticated users to login page
+- [x] Show loading state during auth check
+- [x] Test redirect functionality
+
+### GitHub Publication
+- [x] Resolve merge conflicts with GitHub repository
+- [x] Force push complete MySQL version to GitHub
+- [x] Replace old SQLite version with new production-ready code
+- [x] Verify all code synced to GitHub
+- [x] Create checkpoint for published version

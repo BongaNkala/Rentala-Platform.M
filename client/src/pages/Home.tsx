@@ -1,31 +1,37 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import { Loader2 } from "lucide-react";
 
 /**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
+ * Home page - Acts as a redirect router
+ * - If authenticated: redirects to dashboard
+ * - If not authenticated: redirects to login page
  */
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  const [, navigate] = useLocation();
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    if (loading) return; // Wait for auth check to complete
 
+    if (isAuthenticated) {
+      // Redirect authenticated users to dashboard
+      navigate("/dashboard");
+    } else {
+      // Redirect unauthenticated users to login
+      window.location.href = getLoginUrl();
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  // Show loading state while determining auth status
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-purple-950">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
+        <p className="text-white/60">Loading Rentala...</p>
+      </div>
     </div>
   );
 }
