@@ -46,26 +46,55 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   );
 }
 
+/**
+ * BackgroundVideo Component with Multi-Format Support
+ * 
+ * Supports multiple video formats with fallback:
+ * 1. VP9/WebM (best compression, ~535KB)
+ * 2. HEVC/H.265 (good compression, ~390KB)
+ * 3. H.264/MP4 (universal fallback, ~1.6MB)
+ * 
+ * Uses Intersection Observer for lazy loading to improve initial page load.
+ * Video only loads when visible (10% threshold).
+ */
 function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldPlay, setShouldPlay] = useState(false);
+  const [supportedFormat, setSupportedFormat] = useState<'webm' | 'hevc' | 'mp4'>('mp4');
 
+  // Detect supported video formats
   useEffect(() => {
-    // Create Intersection Observer to detect when video is in viewport
+    const video = document.createElement('video');
+    
+    // Check VP9/WebM support (most efficient)
+    if (video.canPlayType('video/webm; codecs="vp9"')) {
+      setSupportedFormat('webm');
+    }
+    // Check HEVC/H.265 support (good fallback)
+    else if (video.canPlayType('video/mp4; codecs="hev1"') || video.canPlayType('video/mp4; codecs="hvc1"')) {
+      setSupportedFormat('hevc');
+    }
+    // Default to H.264/MP4 (universal support)
+    else {
+      setSupportedFormat('mp4');
+    }
+  }, []);
+
+  // Lazy loading with Intersection Observer
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Video is in viewport, load it
             setShouldPlay(true);
             setIsLoaded(true);
           }
         });
       },
       {
-        threshold: 0.1, // Trigger when 10% of video is visible
+        threshold: 0.1,
       }
     );
 
@@ -80,12 +109,11 @@ function BackgroundVideo() {
     };
   }, []);
 
+  // Handle video playback
   useEffect(() => {
-    // Handle video playback based on visibility
     if (videoRef.current) {
       if (shouldPlay) {
         videoRef.current.play().catch(() => {
-          // Autoplay might be blocked by browser, user will need to interact
           console.log('Video autoplay blocked by browser');
         });
       } else {
@@ -93,6 +121,34 @@ function BackgroundVideo() {
       }
     }
   }, [shouldPlay]);
+
+  // Get video source based on supported format
+  const getVideoSources = () => {
+    const sources = [];
+
+    // Always include WebM/VP9 first (best compression)
+    sources.push({
+      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/exKiSHPdGqVrkDVG.webm',
+      type: 'video/webm; codecs="vp9"',
+      format: 'webm' as const,
+    });
+
+    // Include HEVC as fallback (good compression)
+    sources.push({
+      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/ugmoimFwgmjDksIj.mp4',
+      type: 'video/mp4; codecs="hev1"',
+      format: 'hevc' as const,
+    });
+
+    // Include H.264/MP4 as universal fallback
+    sources.push({
+      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/vOqdkDMXyWIwzDxn.mp4',
+      type: 'video/mp4; codecs="avc1"',
+      format: 'mp4' as const,
+    });
+
+    return sources;
+  };
 
   return (
     <>
@@ -110,7 +166,10 @@ function BackgroundVideo() {
             transition: 'opacity 0.5s ease-in-out',
           }}
         >
-          <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/vOqdkDMXyWIwzDxn.mp4" type="video/mp4" />
+          {getVideoSources().map((source) => (
+            <source key={source.format} src={source.src} type={source.type} />
+          ))}
+          Your browser does not support the video tag. Please use a modern browser to view this content.
         </video>
       </div>
       <div className="video-overlay" />
