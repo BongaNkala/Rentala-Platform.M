@@ -410,3 +410,20 @@ For questions or issues, please refer to the GitHub repository or contact the de
 - [x] Add fallback text for unsupported browsers
 - [x] Create unit tests for multi-format support (15 tests)
 - [x] Verify all tests passing (22/22)
+
+
+## Phase 5: Video Format Analytics Integration
+
+### Video Format Analytics Tracking
+- [x] Create video analytics tracking service
+- [x] Track video format selection (WebM, HEVC, MP4)
+- [x] Track video load time and performance metrics
+- [x] Track browser and device information
+- [x] Store analytics data in database
+- [x] Create analytics router for querying data
+- [x] Implement analytics tracking in BackgroundVideo component
+- [x] Create analytics dashboard page
+- [x] Add format usage visualization (charts)
+- [x] Add device/browser breakdown
+- [x] Create unit tests for analytics (31 tests)
+- [x] Verify all tests passing (53/53)

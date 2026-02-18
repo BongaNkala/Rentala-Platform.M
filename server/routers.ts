@@ -13,6 +13,7 @@ import { accountingRouter } from "./routers/accounting";
 import { pdfExportRouter } from "./routers/pdfExport";
 import { notificationsRouter } from "./routers/notifications";
 import { smsNotificationsRouter } from "./routers/smsNotifications";
+import { videoAnalyticsRouter } from "./routers/videoAnalytics";
 
 export const appRouter = router({
   // Core system routes
@@ -42,6 +43,7 @@ export const appRouter = router({
   pdfExport: pdfExportRouter,
   notifications: notificationsRouter,
   smsNotifications: smsNotificationsRouter,
+  videoAnalytics: videoAnalyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

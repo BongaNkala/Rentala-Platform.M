@@ -15,6 +15,13 @@
       "when": 1767647584636,
       "tag": "0001_living_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771400685644,
+      "tag": "0002_amazing_dazzler",
+      "breakpoints": true
     }
   ]
 }

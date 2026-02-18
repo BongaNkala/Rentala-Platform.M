@@ -18,6 +18,9 @@ import Accounting from "./pages/Accounting";
 import RoleAwareDashboard from "./pages/RoleAwareDashboard";
 import RoleBasedLayout from "./components/RoleBasedLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "./lib/trpc";
+import { getDeviceInfo, generateSessionId } from "./lib/deviceDetection";
+import VideoAnalytics from "./pages/VideoAnalytics";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -47,7 +50,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 /**
- * BackgroundVideo Component with Multi-Format Support
+ * BackgroundVideo Component with Multi-Format Support & Analytics
  * 
  * Supports multiple video formats with fallback:
  * 1. VP9/WebM (best compression, ~535KB)
@@ -56,6 +59,8 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
  * 
  * Uses Intersection Observer for lazy loading to improve initial page load.
  * Video only loads when visible (10% threshold).
+ * 
+ * Tracks video format usage, load times, and device information for analytics.
  */
 function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,24 +68,50 @@ function BackgroundVideo() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldPlay, setShouldPlay] = useState(false);
   const [supportedFormat, setSupportedFormat] = useState<'webm' | 'hevc' | 'mp4'>('mp4');
+  const [sessionId] = useState(() => generateSessionId());
+  const { user } = useAuth();
+  const trackMutation = trpc.videoAnalytics.track.useMutation();
+  const videoStartTimeRef = useRef<number>(0);
 
-  // Detect supported video formats
+  // Detect supported video formats and track analytics
   useEffect(() => {
     const video = document.createElement('video');
+    let detectedFormat: 'webm' | 'hevc' | 'mp4' = 'mp4';
     
     // Check VP9/WebM support (most efficient)
     if (video.canPlayType('video/webm; codecs="vp9"')) {
-      setSupportedFormat('webm');
+      detectedFormat = 'webm';
     }
     // Check HEVC/H.265 support (good fallback)
     else if (video.canPlayType('video/mp4; codecs="hev1"') || video.canPlayType('video/mp4; codecs="hvc1"')) {
-      setSupportedFormat('hevc');
+      detectedFormat = 'hevc';
     }
-    // Default to H.264/MP4 (universal support)
-    else {
-      setSupportedFormat('mp4');
-    }
-  }, []);
+    
+    setSupportedFormat(detectedFormat);
+    
+    // Track analytics asynchronously
+    (async () => {
+      try {
+        const deviceInfo = await getDeviceInfo();
+        trackMutation.mutate({
+          sessionId,
+          userId: user?.id || null,
+          format: detectedFormat,
+          browserName: deviceInfo.browserName,
+          browserVersion: deviceInfo.browserVersion,
+          osName: deviceInfo.osName,
+          osVersion: deviceInfo.osVersion,
+          deviceType: deviceInfo.deviceType,
+          screenResolution: deviceInfo.screenResolution,
+          connectionSpeed: deviceInfo.connectionSpeed,
+          pageUrl: window.location.href,
+          referrer: document.referrer,
+        });
+      } catch (error) {
+        console.error('Failed to track video format:', error);
+      }
+    })();
+  }, [sessionId, user?.id, trackMutation]);
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
@@ -109,10 +140,11 @@ function BackgroundVideo() {
     };
   }, []);
 
-  // Handle video playback
+  // Handle video playback and track load time
   useEffect(() => {
     if (videoRef.current) {
       if (shouldPlay) {
+        videoStartTimeRef.current = performance.now();
         videoRef.current.play().catch(() => {
           console.log('Video autoplay blocked by browser');
         });
@@ -122,7 +154,20 @@ function BackgroundVideo() {
     }
   }, [shouldPlay]);
 
-  // Get video source based on supported format
+  // Track video load time
+  const handleVideoLoadedData = () => {
+    if (videoStartTimeRef.current > 0) {
+      const loadTime = Math.round(performance.now() - videoStartTimeRef.current);
+      trackMutation.mutate({
+        sessionId,
+        userId: user?.id || null,
+        format: supportedFormat,
+        loadTime,
+      });
+    }
+  };
+
+  // Get video sources based on supported format
   const getVideoSources = () => {
     const sources = [];
 
@@ -159,6 +204,7 @@ function BackgroundVideo() {
           loop
           playsInline
           preload={isLoaded ? "auto" : "none"}
+          onLoadedData={handleVideoLoadedData}
           style={{
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
@@ -190,6 +236,7 @@ function Router() {
       <Route path={"/maintenance"} component={() => <ProtectedRoute component={Maintenance} />} />
       <Route path={"/inspections"} component={() => <ProtectedRoute component={Inspections} />} />
       <Route path={"/accounting"} component={() => <ProtectedRoute component={Accounting} />} />
+      <Route path={"/video-analytics"} component={() => <ProtectedRoute component={VideoAnalytics} />} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

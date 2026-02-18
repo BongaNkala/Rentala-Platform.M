@@ -321,6 +321,39 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;
 
 /**
+ * Video Format Analytics (track which video formats are used)
+ */
+export const videoAnalytics = mysqlTable("video_analytics", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 255 }).notNull(),
+  userId: int("userId"),
+  format: mysqlEnum("format", ["webm", "hevc", "mp4"]).notNull(),
+  loadTime: int("loadTime"), // milliseconds
+  playbackTime: int("playbackTime"), // milliseconds
+  browserName: varchar("browserName", { length: 100 }),
+  browserVersion: varchar("browserVersion", { length: 50 }),
+  osName: varchar("osName", { length: 100 }),
+  osVersion: varchar("osVersion", { length: 50 }),
+  deviceType: mysqlEnum("deviceType", ["desktop", "tablet", "mobile"]).default("desktop"),
+  screenResolution: varchar("screenResolution", { length: 50 }),
+  connectionSpeed: varchar("connectionSpeed", { length: 50 }), // 4g, 3g, slow-2g, etc
+  pageUrl: varchar("pageUrl", { length: 512 }),
+  referrer: varchar("referrer", { length: 512 }),
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  country: varchar("country", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  formatIdx: index("video_format_idx").on(table.format),
+  userIdIdx: index("video_user_idx").on(table.userId),
+  sessionIdIdx: index("video_session_idx").on(table.sessionId),
+  createdAtIdx: index("video_created_idx").on(table.createdAt),
+  deviceTypeIdx: index("video_device_idx").on(table.deviceType),
+}));
+export type VideoAnalytics = typeof videoAnalytics.$inferSelect;
+export type InsertVideoAnalytics = typeof videoAnalytics.$inferInsert;
+
+/**
  * Audit Log (for compliance and tracking)
  */
 export const auditLog = mysqlTable("audit_log", {
