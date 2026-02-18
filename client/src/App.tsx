@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
+import { useEffect, useRef, useState } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -46,18 +47,67 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 function BackgroundVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [shouldPlay, setShouldPlay] = useState(false);
+
+  useEffect(() => {
+    // Create Intersection Observer to detect when video is in viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Video is in viewport, load it
+            setShouldPlay(true);
+            setIsLoaded(true);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of video is visible
+      }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Handle video playback based on visibility
+    if (videoRef.current) {
+      if (shouldPlay) {
+        videoRef.current.play().catch(() => {
+          // Autoplay might be blocked by browser, user will need to interact
+          console.log('Video autoplay blocked by browser');
+        });
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [shouldPlay]);
+
   return (
     <>
-      <div className="video-background">
+      <div ref={containerRef} className="video-background">
         <video
-          autoPlay
+          ref={videoRef}
           muted
           loop
           playsInline
-          preload="metadata"
+          preload={isLoaded ? "auto" : "none"}
           style={{
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
+            opacity: isLoaded ? 1 : 0,
+            transition: 'opacity 0.5s ease-in-out',
           }}
         >
           <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/vOqdkDMXyWIwzDxn.mp4" type="video/mp4" />
