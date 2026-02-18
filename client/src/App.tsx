@@ -45,6 +45,29 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   );
 }
 
+function BackgroundVideo() {
+  return (
+    <>
+      <div className="video-background">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          style={{
+            WebkitBackfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden',
+          }}
+        >
+          <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/vOqdkDMXyWIwzDxn.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div className="video-overlay" />
+    </>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -72,6 +95,7 @@ function App() {
         defaultTheme="light"
         // switchable
       >
+        <BackgroundVideo />
         <TooltipProvider>
           <Toaster />
           <Router />
