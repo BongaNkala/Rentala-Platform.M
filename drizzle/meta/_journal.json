@@ -22,6 +22,13 @@
       "when": 1771400685644,
       "tag": "0002_amazing_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1771746715182,
+      "tag": "0003_legal_talon",
+      "breakpoints": true
     }
   ]
 }

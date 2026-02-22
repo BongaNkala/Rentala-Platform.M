@@ -1,0 +1,1 @@
+ALTER TABLE `video_analytics` MODIFY COLUMN `format` enum('webm','hevc','mp4','image') NOT NULL;

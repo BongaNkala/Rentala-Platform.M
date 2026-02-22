@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
@@ -50,53 +49,30 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 /**
- * BackgroundVideo Component with Multi-Format Support & Analytics
+ * BackgroundImage Component - Universal Background
  * 
- * Supports multiple video formats with fallback:
- * 1. VP9/WebM (best compression, ~535KB)
- * 2. HEVC/H.265 (good compression, ~390KB)
- * 3. H.264/MP4 (universal fallback, ~1.6MB)
- * 
- * Uses Intersection Observer for lazy loading to improve initial page load.
- * Video only loads when visible (10% threshold).
- * 
- * Tracks video format usage, load times, and device information for analytics.
+ * Displays a static background image across all pages with:
+ * - Lazy loading for performance
+ * - Responsive sizing (cover/contain)
+ * - Dark overlay for text readability
+ * - Smooth fade-in animation
  */
-function BackgroundVideo() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+function BackgroundImage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [shouldPlay, setShouldPlay] = useState(false);
-  const [supportedFormat, setSupportedFormat] = useState<'webm' | 'hevc' | 'mp4'>('mp4');
   const [sessionId] = useState(() => generateSessionId());
   const { user } = useAuth();
   const trackMutation = trpc.videoAnalytics.track.useMutation();
-  const videoStartTimeRef = useRef<number>(0);
 
-  // Detect supported video formats and track analytics
+  // Track background image load
   useEffect(() => {
-    const video = document.createElement('video');
-    let detectedFormat: 'webm' | 'hevc' | 'mp4' = 'mp4';
-    
-    // Check VP9/WebM support (most efficient)
-    if (video.canPlayType('video/webm; codecs="vp9"')) {
-      detectedFormat = 'webm';
-    }
-    // Check HEVC/H.265 support (good fallback)
-    else if (video.canPlayType('video/mp4; codecs="hev1"') || video.canPlayType('video/mp4; codecs="hvc1"')) {
-      detectedFormat = 'hevc';
-    }
-    
-    setSupportedFormat(detectedFormat);
-    
-    // Track analytics asynchronously
     (async () => {
       try {
         const deviceInfo = await getDeviceInfo();
         trackMutation.mutate({
           sessionId,
           userId: user?.id || null,
-          format: detectedFormat,
+          format: 'image',
           browserName: deviceInfo.browserName,
           browserVersion: deviceInfo.browserVersion,
           osName: deviceInfo.osName,
@@ -108,7 +84,7 @@ function BackgroundVideo() {
           referrer: document.referrer,
         });
       } catch (error) {
-        console.error('Failed to track video format:', error);
+        console.error('Failed to track background image:', error);
       }
     })();
   }, [sessionId, user?.id, trackMutation]);
@@ -119,7 +95,6 @@ function BackgroundVideo() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setShouldPlay(true);
             setIsLoaded(true);
           }
         });
@@ -140,125 +115,51 @@ function BackgroundVideo() {
     };
   }, []);
 
-  // Handle video playback and track load time
-  useEffect(() => {
-    if (videoRef.current) {
-      if (shouldPlay) {
-        videoStartTimeRef.current = performance.now();
-        videoRef.current.play().catch(() => {
-          console.log('Video autoplay blocked by browser');
-        });
-      } else {
-        videoRef.current.pause();
-      }
-    }
-  }, [shouldPlay]);
-
-  // Track video load time
-  const handleVideoLoadedData = () => {
-    if (videoStartTimeRef.current > 0) {
-      const loadTime = Math.round(performance.now() - videoStartTimeRef.current);
-      trackMutation.mutate({
-        sessionId,
-        userId: user?.id || null,
-        format: supportedFormat,
-        loadTime,
-      });
-    }
-  };
-
-  // Get video sources based on supported format
-  const getVideoSources = () => {
-    const sources = [];
-
-    // Always include WebM/VP9 first (best compression)
-    sources.push({
-      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/exKiSHPdGqVrkDVG.webm',
-      type: 'video/webm; codecs="vp9"',
-      format: 'webm' as const,
-    });
-
-    // Include HEVC as fallback (good compression)
-    sources.push({
-      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/ugmoimFwgmjDksIj.mp4',
-      type: 'video/mp4; codecs="hev1"',
-      format: 'hevc' as const,
-    });
-
-    // Include H.264/MP4 as universal fallback
-    sources.push({
-      src: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/vOqdkDMXyWIwzDxn.mp4',
-      type: 'video/mp4; codecs="avc1"',
-      format: 'mp4' as const,
-    });
-
-    return sources;
-  };
-
   return (
     <>
-      <div ref={containerRef} className="video-background">
-        <video
-          ref={videoRef}
-          muted
-          loop
-          playsInline
-          preload={isLoaded ? "auto" : "none"}
-          onLoadedData={handleVideoLoadedData}
-          style={{
-            WebkitBackfaceVisibility: 'hidden',
-            backfaceVisibility: 'hidden',
-            opacity: isLoaded ? 1 : 0,
-            transition: 'opacity 0.5s ease-in-out',
-          }}
-        >
-          {getVideoSources().map((source) => (
-            <source key={source.format} src={source.src} type={source.type} />
-          ))}
-          Your browser does not support the video tag. Please use a modern browser to view this content.
-        </video>
-      </div>
-      <div className="video-overlay" />
+      <div
+        ref={containerRef}
+        className="fixed inset-0 bg-background -z-10"
+        style={{
+          backgroundImage: isLoaded
+            ? 'url(https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/gcccXcqPpgLARqOY.png)'
+            : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 0.8s ease-in-out',
+        }}
+      />
+      {/* Dark overlay for text readability */}
+      <div className="fixed inset-0 bg-black/40 -z-10" style={{ opacity: isLoaded ? 1 : 0 }} />
     </>
   );
 }
 
-function Router() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/dashboard"} component={() => <ProtectedRoute component={RoleAwareDashboard} />} />
-      <Route path={"/properties"} component={() => <ProtectedRoute component={Properties} />} />
-      <Route path={"/units"} component={() => <ProtectedRoute component={Units} />} />
-      <Route path={"/tenants"} component={() => <ProtectedRoute component={Tenants} />} />
-      <Route path={"/leases"} component={() => <ProtectedRoute component={Leases} />} />
-      <Route path={"/payments"} component={() => <ProtectedRoute component={Payments} />} />
-      <Route path={"/maintenance"} component={() => <ProtectedRoute component={Maintenance} />} />
-      <Route path={"/inspections"} component={() => <ProtectedRoute component={Inspections} />} />
-      <Route path={"/accounting"} component={() => <ProtectedRoute component={Accounting} />} />
-      <Route path={"/video-analytics"} component={() => <ProtectedRoute component={VideoAnalytics} />} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
+export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <BackgroundVideo />
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <BackgroundImage />
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+            <Route path="/properties" component={() => <ProtectedRoute component={Properties} />} />
+            <Route path="/units" component={() => <ProtectedRoute component={Units} />} />
+            <Route path="/tenants" component={() => <ProtectedRoute component={Tenants} />} />
+            <Route path="/leases" component={() => <ProtectedRoute component={Leases} />} />
+            <Route path="/payments" component={() => <ProtectedRoute component={Payments} />} />
+            <Route path="/maintenance" component={() => <ProtectedRoute component={Maintenance} />} />
+            <Route path="/inspections" component={() => <ProtectedRoute component={Inspections} />} />
+            <Route path="/accounting" component={() => <ProtectedRoute component={Accounting} />} />
+            <Route path="/role-dashboard" component={() => <ProtectedRoute component={RoleAwareDashboard} />} />
+            <Route path="/video-analytics" component={() => <ProtectedRoute component={VideoAnalytics} />} />
+            <Route component={NotFound} />
+          </Switch>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
 }
-
-export default App;

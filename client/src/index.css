@@ -134,66 +134,28 @@
 }
 
 @layer components {
-  /* Background Video Styling */
-  .video-background {
+  /* Background Image Styling */
+  .background-image {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: -1;
-    overflow: hidden;
-  }
-
-  .video-background video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-    will-change: opacity;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    will-change: background-image;
     contain: layout style paint;
   }
 
-  /* Skeleton loader for video before it loads */
-  .video-background.loading::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-    z-index: 1;
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
-  }
-
-  .video-overlay {
+  .background-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(20, 20, 30, 0.65) 0%, rgba(30, 30, 50, 0.55) 100%);
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.4) 0%, rgba(30, 30, 50, 0.35) 100%);
     z-index: -1;
     pointer-events: none;
   }

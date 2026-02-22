@@ -327,7 +327,7 @@ export const videoAnalytics = mysqlTable("video_analytics", {
   id: int("id").autoincrement().primaryKey(),
   sessionId: varchar("sessionId", { length: 255 }).notNull(),
   userId: int("userId"),
-  format: mysqlEnum("format", ["webm", "hevc", "mp4"]).notNull(),
+  format: mysqlEnum("format", ["webm", "hevc", "mp4", "image"]).notNull(),
   loadTime: int("loadTime"), // milliseconds
   playbackTime: int("playbackTime"), // milliseconds
   browserName: varchar("browserName", { length: 100 }),
