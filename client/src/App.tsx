@@ -20,6 +20,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "./lib/trpc";
 import { getDeviceInfo, generateSessionId } from "./lib/deviceDetection";
 import VideoAnalytics from "./pages/VideoAnalytics";
+import Analytics from "./pages/Analytics";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -156,6 +157,7 @@ export default function App() {
             <Route path="/accounting" component={() => <ProtectedRoute component={Accounting} />} />
             <Route path="/role-dashboard" component={() => <ProtectedRoute component={RoleAwareDashboard} />} />
             <Route path="/video-analytics" component={() => <ProtectedRoute component={VideoAnalytics} />} />
+            <Route path="/analytics" component={() => <ProtectedRoute component={Analytics} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>

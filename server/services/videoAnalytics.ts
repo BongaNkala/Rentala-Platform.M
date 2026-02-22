@@ -8,7 +8,7 @@ import { gte, sql } from "drizzle-orm";
  */
 
 export interface VideoFormatData {
-  format: "webm" | "hevc" | "mp4";
+  format: "webm" | "hevc" | "mp4" | "image";
   loadTime?: number;
   playbackTime?: number;
   browserName?: string;

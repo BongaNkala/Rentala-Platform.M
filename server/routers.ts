@@ -14,6 +14,7 @@ import { pdfExportRouter } from "./routers/pdfExport";
 import { notificationsRouter } from "./routers/notifications";
 import { smsNotificationsRouter } from "./routers/smsNotifications";
 import { videoAnalyticsRouter } from "./routers/videoAnalytics";
+import { propertyAnalyticsRouter } from "./routers/propertyAnalytics";
 
 export const appRouter = router({
   // Core system routes
@@ -44,6 +45,7 @@ export const appRouter = router({
   notifications: notificationsRouter,
   smsNotifications: smsNotificationsRouter,
   videoAnalytics: videoAnalyticsRouter,
+  propertyAnalytics: propertyAnalyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

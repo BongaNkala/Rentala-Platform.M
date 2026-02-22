@@ -22,7 +22,7 @@ export const videoAnalyticsRouter = router({
       z.object({
         sessionId: z.string(),
         userId: z.number().nullable(),
-        format: z.enum(["webm", "hevc", "mp4"]),
+        format: z.enum(["webm", "hevc", "mp4", "image"]),
         loadTime: z.number().optional(),
         playbackTime: z.number().optional(),
         browserName: z.string().optional(),
