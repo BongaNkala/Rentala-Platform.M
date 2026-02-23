@@ -5,6 +5,7 @@ import {
   getMaintenanceCosts,
   getTenantPaymentBehavior,
   getPropertyPerformance,
+  getTenantSatisfactionTrends,
 } from "./propertyAnalytics";
 
 // Mock the db module
@@ -194,3 +195,80 @@ describe("Property Analytics Service", () => {
   });
 });
 
+
+  describe("getTenantSatisfactionTrends", () => {
+    it("should return empty array when database is unavailable", async () => {
+      const result = await getTenantSatisfactionTrends(12);
+      expect(result).toEqual([]);
+    });
+
+    it("should accept valid months parameter", async () => {
+      const result = await getTenantSatisfactionTrends(6);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should handle 12 months by default", async () => {
+      const result = await getTenantSatisfactionTrends();
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should return array of satisfaction trends", async () => {
+      const result = await getTenantSatisfactionTrends();
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should have correct structure for satisfaction items", async () => {
+      const result = await getTenantSatisfactionTrends();
+      if (result.length > 0) {
+        expect(result[0]).toHaveProperty("month");
+        expect(result[0]).toHaveProperty("averageSatisfaction");
+        expect(result[0]).toHaveProperty("averageCleanliness");
+        expect(result[0]).toHaveProperty("averageMaintenance");
+        expect(result[0]).toHaveProperty("averageCommunication");
+        expect(result[0]).toHaveProperty("averageResponsiveness");
+        expect(result[0]).toHaveProperty("averageValueForMoney");
+        expect(result[0]).toHaveProperty("surveyCount");
+        expect(result[0]).toHaveProperty("recommendPercentage");
+      }
+    });
+  });
+
+  describe("Satisfaction data validation", () => {
+    it("satisfaction trends should have valid date format", async () => {
+      const result = await getTenantSatisfactionTrends(3);
+      if (result.length > 0) {
+        expect(result[0]).toHaveProperty("month");
+        expect(typeof result[0].month).toBe("string");
+      }
+    });
+
+    it("satisfaction scores should be between 0 and 5", async () => {
+      const result = await getTenantSatisfactionTrends(3);
+      if (result.length > 0) {
+        expect(result[0].averageSatisfaction).toBeGreaterThanOrEqual(0);
+        expect(result[0].averageSatisfaction).toBeLessThanOrEqual(5);
+        expect(result[0].averageCleanliness).toBeGreaterThanOrEqual(0);
+        expect(result[0].averageCleanliness).toBeLessThanOrEqual(5);
+      }
+    });
+
+    it("recommend percentage should be between 0 and 100", async () => {
+      const result = await getTenantSatisfactionTrends(3);
+      if (result.length > 0) {
+        expect(result[0].recommendPercentage).toBeGreaterThanOrEqual(0);
+        expect(result[0].recommendPercentage).toBeLessThanOrEqual(100);
+      }
+    });
+
+    it("survey count should be non-negative", async () => {
+      const result = await getTenantSatisfactionTrends(3);
+      if (result.length > 0) {
+        expect(result[0].surveyCount).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it("should handle errors gracefully in getTenantSatisfactionTrends", async () => {
+      const result = await getTenantSatisfactionTrends(12);
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });

@@ -29,6 +29,13 @@
       "when": 1771746715182,
       "tag": "0003_legal_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1771794356420,
+      "tag": "0004_calm_the_hand",
+      "breakpoints": true
     }
   ]
 }

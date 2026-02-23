@@ -1,5 +1,5 @@
 import { getDb } from "../db";
-import { properties, units, leases, payments, maintenanceRequests } from "../../drizzle/schema";
+import { properties, units, leases, payments, maintenanceRequests, tenantSatisfactionSurveys } from "../../drizzle/schema";
 import { gte, sql, and, eq } from "drizzle-orm";
 
 /**
@@ -45,6 +45,18 @@ export interface PropertyPerformance {
   monthlyIncome: number;
   maintenanceCost: number;
   netIncome: number;
+}
+
+export interface TenantSatisfactionTrend {
+  month: string;
+  averageSatisfaction: number;
+  averageCleanliness: number;
+  averageMaintenance: number;
+  averageCommunication: number;
+  averageResponsiveness: number;
+  averageValueForMoney: number;
+  surveyCount: number;
+  recommendPercentage: number;
 }
 
 /**
@@ -290,6 +302,68 @@ export async function getPropertyPerformance(): Promise<PropertyPerformance[]> {
     return performance;
   } catch (error) {
     console.error("Failed to get property performance:", error);
+    return [];
+  }
+}
+
+/**
+ * Get tenant satisfaction trends over time
+ */
+export async function getTenantSatisfactionTrends(months: number = 12): Promise<TenantSatisfactionTrend[]> {
+  try {
+    const db = await getDb();
+    if (!db) return [];
+
+    const trends: TenantSatisfactionTrend[] = [];
+
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+      // Get satisfaction data for the month
+      const satisfactionData = await db
+        .select({
+          overallSatisfaction: sql<number>`AVG(${tenantSatisfactionSurveys.overallSatisfaction}) as overallSatisfaction`,
+          cleanliness: sql<number>`AVG(${tenantSatisfactionSurveys.cleanliness}) as cleanliness`,
+          maintenance: sql<number>`AVG(${tenantSatisfactionSurveys.maintenance}) as maintenance`,
+          communication: sql<number>`AVG(${tenantSatisfactionSurveys.communication}) as communication`,
+          responsiveness: sql<number>`AVG(${tenantSatisfactionSurveys.responsiveness}) as responsiveness`,
+          valueForMoney: sql<number>`AVG(${tenantSatisfactionSurveys.valueForMoney}) as valueForMoney`,
+          surveyCount: sql<number>`COUNT(*) as surveyCount`,
+          recommendCount: sql<number>`SUM(CASE WHEN ${tenantSatisfactionSurveys.wouldRecommend} = true THEN 1 ELSE 0 END) as recommendCount`,
+        })
+        .from(tenantSatisfactionSurveys)
+        .where(
+          and(
+            gte(tenantSatisfactionSurveys.surveyDate, sql`${monthStart}`),
+            gte(sql`${monthEnd}`, tenantSatisfactionSurveys.surveyDate)
+          )
+        );
+
+      const data = satisfactionData[0];
+      const surveyCount = data?.surveyCount || 0;
+      const recommendCount = data?.recommendCount || 0;
+
+      if (surveyCount > 0) {
+        trends.push({
+          month: monthStart.toLocaleDateString("en-US", { year: "numeric", month: "short" }),
+          averageSatisfaction: Math.round((data?.overallSatisfaction || 0) * 10) / 10,
+          averageCleanliness: Math.round((data?.cleanliness || 0) * 10) / 10,
+          averageMaintenance: Math.round((data?.maintenance || 0) * 10) / 10,
+          averageCommunication: Math.round((data?.communication || 0) * 10) / 10,
+          averageResponsiveness: Math.round((data?.responsiveness || 0) * 10) / 10,
+          averageValueForMoney: Math.round((data?.valueForMoney || 0) * 10) / 10,
+          surveyCount,
+          recommendPercentage: Math.round((recommendCount / surveyCount) * 100),
+        });
+      }
+    }
+
+    return trends;
+  } catch (error) {
+    console.error("Failed to get tenant satisfaction trends:", error);
     return [];
   }
 }

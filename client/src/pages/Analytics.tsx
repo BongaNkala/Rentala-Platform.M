@@ -30,6 +30,7 @@ export default function Analytics() {
   const maintenanceQuery = trpc.propertyAnalytics.getMaintenanceCosts.useQuery();
   const paymentQuery = trpc.propertyAnalytics.getTenantPaymentBehavior.useQuery();
   const performanceQuery = trpc.propertyAnalytics.getPropertyPerformance.useQuery();
+  const satisfactionQuery = trpc.propertyAnalytics.getTenantSatisfactionTrends.useQuery({ months });
 
   const COLORS = ["#4361ee", "#7209b7", "#4cc9f0", "#f72585", "#4895ef", "#560bad"];
 
@@ -68,11 +69,12 @@ export default function Analytics() {
 
       {/* Tabs */}
       <Tabs defaultValue="vacancy" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-purple-900/50 border border-purple-500/30">
+        <TabsList className="grid w-full grid-cols-5 bg-purple-900/50 border border-purple-500/30">
           <TabsTrigger value="vacancy">Vacancy Trends</TabsTrigger>
           <TabsTrigger value="income">Income Forecast</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance Costs</TabsTrigger>
           <TabsTrigger value="payments">Payment Behavior</TabsTrigger>
+          <TabsTrigger value="satisfaction">Tenant Satisfaction</TabsTrigger>
         </TabsList>
 
         {/* Vacancy Trends Tab */}
@@ -256,6 +258,128 @@ export default function Analytics() {
             </Card>
           </div>
         </TabsContent>
+
+        {/* Tenant Satisfaction Tab */}
+        <TabsContent value="satisfaction" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6 lg:col-span-2">
+              <h2 className="text-xl font-semibold text-white mb-4">Overall Satisfaction Trends</h2>
+              {satisfactionQuery.isLoading ? (
+                <div className="h-80 flex items-center justify-center text-gray-400">
+                  Loading...
+                </div>
+              ) : satisfactionQuery.data && satisfactionQuery.data.length > 0 ? (
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={satisfactionQuery.data}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="month" stroke="#999" />
+                    <YAxis stroke="#999" domain={[0, 5]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1a1a2e",
+                        border: "1px solid #4361ee",
+                        borderRadius: "8px",
+                      }}
+                      formatter={(value: number) => value.toFixed(1)}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="averageSatisfaction"
+                      stroke="#4cc9f0"
+                      strokeWidth={2}
+                      dot={{ fill: "#4cc9f0" }}
+                      name="Overall Satisfaction"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="averageCommunication"
+                      stroke="#4361ee"
+                      strokeWidth={2}
+                      dot={{ fill: "#4361ee" }}
+                      name="Communication"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="averageResponsiveness"
+                      stroke="#f72585"
+                      strokeWidth={2}
+                      dot={{ fill: "#f72585" }}
+                      name="Responsiveness"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-80 flex items-center justify-center text-gray-400">
+                  No satisfaction data available
+                </div>
+              )}
+            </Card>
+
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Category Ratings</h2>
+              {satisfactionQuery.isLoading ? (
+                <div className="h-80 flex items-center justify-center text-gray-400">
+                  Loading...
+                </div>
+              ) : satisfactionQuery.data && satisfactionQuery.data.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={satisfactionQuery.data}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="month" stroke="#999" />
+                    <YAxis stroke="#999" domain={[0, 5]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1a1a2e",
+                        border: "1px solid #4361ee",
+                        borderRadius: "8px",
+                      }}
+                      formatter={(value: number) => value.toFixed(1)}
+                    />
+                    <Legend />
+                    <Bar dataKey="averageCleanliness" fill="#4361ee" name="Cleanliness" />
+                    <Bar dataKey="averageMaintenance" fill="#4cc9f0" name="Maintenance" />
+                    <Bar dataKey="averageValueForMoney" fill="#f72585" name="Value for Money" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-80 flex items-center justify-center text-gray-400">
+                  No satisfaction data available
+                </div>
+              )}
+            </Card>
+
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Satisfaction Summary</h2>
+              {satisfactionQuery.isLoading ? (
+                <div className="space-y-4">
+                  <div className="h-12 bg-purple-800/30 rounded animate-pulse" />
+                  <div className="h-12 bg-purple-800/30 rounded animate-pulse" />
+                </div>
+              ) : satisfactionQuery.data && satisfactionQuery.data.length > 0 ? (
+                <div className="space-y-4">
+                  {satisfactionQuery.data.map((item) => (
+                    <div key={item.month} className="p-3 bg-purple-800/20 rounded">
+                      <p className="text-white font-medium">{item.month}</p>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                          <p className="text-gray-400">Surveys</p>
+                          <p className="text-cyan-400 font-semibold">{item.surveyCount}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Would Recommend</p>
+                          <p className="text-green-400 font-semibold">{item.recommendPercentage}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-400 text-center py-8">No satisfaction data available</div>
+              )}
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Property Performance */}
@@ -313,4 +437,3 @@ export default function Analytics() {
     </div>
   );
 }
-

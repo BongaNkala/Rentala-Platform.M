@@ -372,3 +372,32 @@ export const auditLog = mysqlTable("audit_log", {
 
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
+
+/**
+ * Tenant Satisfaction Surveys
+ * Tracks tenant satisfaction feedback over time for analytics and improvement
+ */
+export const tenantSatisfactionSurveys = mysqlTable("tenant_satisfaction_surveys", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenantId").notNull(),
+  propertyId: int("propertyId").notNull(),
+  leaseId: int("leaseId"),
+  overallSatisfaction: int("overallSatisfaction").notNull(), // 1-5 scale
+  cleanliness: int("cleanliness"), // 1-5 scale
+  maintenance: int("maintenance"), // 1-5 scale
+  communication: int("communication"), // 1-5 scale
+  responsiveness: int("responsiveness"), // 1-5 scale
+  valueForMoney: int("valueForMoney"), // 1-5 scale
+  comments: longtext("comments"),
+  wouldRecommend: boolean("wouldRecommend"),
+  surveyDate: timestamp("surveyDate").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  tenantIdIdx: index("satisfaction_tenant_idx").on(table.tenantId),
+  propertyIdIdx: index("satisfaction_property_idx").on(table.propertyId),
+  surveyDateIdx: index("satisfaction_date_idx").on(table.surveyDate),
+}));
+
+export type TenantSatisfactionSurvey = typeof tenantSatisfactionSurveys.$inferSelect;
+export type InsertTenantSatisfactionSurvey = typeof tenantSatisfactionSurveys.$inferInsert;

@@ -6,6 +6,7 @@ import {
   getMaintenanceCosts,
   getTenantPaymentBehavior,
   getPropertyPerformance,
+  getTenantSatisfactionTrends,
 } from "../services/propertyAnalytics";
 
 export const propertyAnalyticsRouter = router({
@@ -46,6 +47,15 @@ export const propertyAnalyticsRouter = router({
    */
   getPropertyPerformance: publicProcedure.query(async () => {
       return getPropertyPerformance();
+    }),
+
+  /**
+   * Get tenant satisfaction trends over time
+   */
+  getTenantSatisfactionTrends: publicProcedure
+    .input(z.object({ months: z.number().min(1).max(60).default(12) }))
+    .query(async ({ input }) => {
+      return getTenantSatisfactionTrends(input.months);
     }),
 });
 
