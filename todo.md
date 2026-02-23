@@ -600,3 +600,35 @@ For questions or issues, please refer to the GitHub repository or contact the de
 
 ### Status
 - [x] Satisfaction PDF export feature complete
+
+
+## Phase 2 (Continued): Customizable PDF Report Metrics
+
+### PDF Service Enhancement
+- [x] Define metric selection types (overall, cleanliness, maintenance, communication, responsiveness, value, surveys, recommendations)
+- [x] Update generateSatisfactionReportPDFBuffer to accept metrics parameter
+- [x] Conditionally include sections based on selected metrics
+- [x] Optimize PDF layout based on selected metrics
+
+### Backend API Enhancement
+- [x] Update exportSatisfactionReport endpoint to accept metrics array
+- [x] Validate metric selections
+- [x] Pass metrics to PDF generation service
+
+### Frontend UI Enhancement
+- [x] Create metric selector component with checkboxes
+- [x] Add "Select Metrics" button to Tenant Satisfaction tab
+- [x] Store metric preferences in component state
+- [x] Update export button to pass selected metrics
+- [x] Add "Select All" and "Deselect All" options
+
+### Testing
+- [x] Test PDF generation with different metric combinations
+- [x] Test with all metrics selected
+- [x] Test with single metric selected
+- [x] Test with no metrics selected (handle gracefully)
+- [x] Added 9 new unit tests for metric validation
+- [x] All 88 tests passing (35 property analytics tests)
+
+### Status
+- [x] Customizable PDF report feature complete

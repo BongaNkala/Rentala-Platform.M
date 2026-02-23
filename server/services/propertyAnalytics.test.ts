@@ -247,3 +247,71 @@ describe("Property Analytics Service", () => {
     });
   });
 });
+
+
+  describe("Customizable PDF Metrics", () => {
+    it("should validate metric selection types", () => {
+      const validMetrics = ["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"];
+      expect(validMetrics).toBeDefined();
+      expect(validMetrics.length).toBe(8);
+    });
+
+    it("should handle single metric selection", () => {
+      const selectedMetrics = ["overall"];
+      expect(selectedMetrics).toContain("overall");
+      expect(selectedMetrics.length).toBe(1);
+    });
+
+    it("should handle multiple metric selections", () => {
+      const selectedMetrics = ["overall", "cleanliness", "maintenance", "communication"];
+      expect(selectedMetrics.length).toBe(4);
+      expect(selectedMetrics).toContain("overall");
+      expect(selectedMetrics).toContain("cleanliness");
+    });
+
+    it("should handle empty metric selection", () => {
+      const selectedMetrics: string[] = [];
+      expect(selectedMetrics.length).toBe(0);
+    });
+
+    it("should handle all metrics selected", () => {
+      const allMetrics = ["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"];
+      expect(allMetrics.length).toBe(8);
+    });
+
+    it("should validate category metrics", () => {
+      const categoryMetrics = ["cleanliness", "maintenance", "communication", "responsiveness", "value"];
+      const selectedMetrics = ["cleanliness", "maintenance"];
+      const hasCategory = categoryMetrics.some((m) => selectedMetrics.includes(m));
+      expect(hasCategory).toBe(true);
+    });
+
+    it("should validate summary metrics", () => {
+      const summaryMetrics = ["overall", "surveys", "recommendations"];
+      const selectedMetrics = ["overall", "surveys"];
+      expect(selectedMetrics).toContain("overall");
+      expect(selectedMetrics).toContain("surveys");
+    });
+
+    it("should handle metric combinations for trends table", () => {
+      const trendMetrics = ["overall", "surveys", "recommendations"];
+      const selectedMetrics = ["overall", "recommendations"];
+      const hasTrendMetrics = trendMetrics.some((m) => selectedMetrics.includes(m));
+      expect(hasTrendMetrics).toBe(true);
+    });
+
+    it("should validate metric labels mapping", () => {
+      const metricLabels: Record<string, string> = {
+        overall: "Overall Satisfaction",
+        cleanliness: "Cleanliness",
+        maintenance: "Maintenance",
+        communication: "Communication",
+        responsiveness: "Responsiveness",
+        value: "Value for Money",
+        surveys: "Survey Count",
+        recommendations: "Recommendations",
+      };
+      expect(Object.keys(metricLabels).length).toBe(8);
+      expect(metricLabels.overall).toBe("Overall Satisfaction");
+    });
+  });

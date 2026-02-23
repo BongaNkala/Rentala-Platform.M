@@ -21,10 +21,25 @@ import {
 } from "recharts";
 import { trpc } from "@/lib/trpc";
 
+type ReportMetric = "overall" | "cleanliness" | "maintenance" | "communication" | "responsiveness" | "value" | "surveys" | "recommendations";
+
+const METRIC_LABELS: Record<ReportMetric, string> = {
+  overall: "Overall Satisfaction",
+  cleanliness: "Cleanliness",
+  maintenance: "Maintenance",
+  communication: "Communication",
+  responsiveness: "Responsiveness",
+  value: "Value for Money",
+  surveys: "Survey Count",
+  recommendations: "Recommendations",
+};
+
 export default function Analytics() {
   const [months, setMonths] = useState(12);
   const [selectedPropertyId, setSelectedPropertyId] = useState<number | undefined>(undefined);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"]);
+  const [showMetricSelector, setShowMetricSelector] = useState(false);
 
   // Fetch properties list for filtering
   const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
@@ -280,7 +295,48 @@ export default function Analytics() {
 
         {/* Tenant Satisfaction Tab */}
         <TabsContent value="satisfaction" className="space-y-4">
-          <div className="flex justify-end mb-4">
+          {showMetricSelector && (
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">Select Report Metrics</h3>
+                <Button variant="outline" size="sm" onClick={() => setShowMetricSelector(false)}>
+                  Done
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {(Object.keys(METRIC_LABELS) as ReportMetric[]).map((metric) => (
+                  <label key={metric} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedMetrics.includes(metric)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedMetrics([...selectedMetrics, metric]);
+                        } else {
+                          setSelectedMetrics(selectedMetrics.filter((m) => m !== metric));
+                        }
+                      }}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-white">{METRIC_LABELS[metric]}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button size="sm" variant="outline" onClick={() => setSelectedMetrics(Object.keys(METRIC_LABELS) as ReportMetric[])}>
+                  Select All
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setSelectedMetrics([])}>
+                  Deselect All
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          <div className="flex justify-end gap-2 mb-4">
+            <Button onClick={() => setShowMetricSelector(!showMetricSelector)} variant="outline" className="border-purple-500 text-purple-400 hover:bg-purple-900/30">
+              {showMetricSelector ? "Hide Metrics" : "Select Metrics"}
+            </Button>
             <Button
               onClick={async () => {
                 setIsExporting(true);
@@ -288,6 +344,7 @@ export default function Analytics() {
                   const result = await exportMutation.mutateAsync({
                     months,
                     propertyId: selectedPropertyId,
+                    metrics: selectedMetrics,
                   });
                   if (result.success) {
                     const link = document.createElement("a");

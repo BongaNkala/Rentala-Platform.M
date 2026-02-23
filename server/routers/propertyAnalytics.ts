@@ -11,7 +11,7 @@ import {
   getPropertyPerformance,
   getTenantSatisfactionTrends,
 } from "../services/propertyAnalytics";
-import { generateSatisfactionReportPDFBuffer } from "../services/satisfactionReportPdf";
+import { generateSatisfactionReportPDFBuffer, type ReportMetric } from "../services/satisfactionReportPdf";
 
 export const propertyAnalyticsRouter = router({
   /**
@@ -82,7 +82,13 @@ export const propertyAnalyticsRouter = router({
   }),
 
   exportSatisfactionReport: publicProcedure
-    .input(z.object({ months: z.number().min(1).max(60).default(12), propertyId: z.number().optional() }))
+    .input(
+      z.object({
+        months: z.number().min(1).max(60).default(12),
+        propertyId: z.number().optional(),
+        metrics: z.array(z.enum(["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"])).default(["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"]),
+      })
+    )
     .mutation(async ({ input }) => {
       try {
         const db = await getDb();
@@ -101,7 +107,7 @@ export const propertyAnalyticsRouter = router({
         }
 
         const satisfactionData = await getTenantSatisfactionTrends(input.months, input.propertyId);
-        const pdfBuffer = await generateSatisfactionReportPDFBuffer(propertyName, satisfactionData, input.months);
+        const pdfBuffer = await generateSatisfactionReportPDFBuffer(propertyName, satisfactionData, input.months, input.metrics as ReportMetric[]);
 
         return {
           success: true,
