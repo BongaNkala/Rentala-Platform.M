@@ -307,9 +307,9 @@ export async function getPropertyPerformance(): Promise<PropertyPerformance[]> {
 }
 
 /**
- * Get tenant satisfaction trends over time
+ * Get tenant satisfaction trends over time, optionally filtered by property
  */
-export async function getTenantSatisfactionTrends(months: number = 12): Promise<TenantSatisfactionTrend[]> {
+export async function getTenantSatisfactionTrends(months: number = 12, propertyId?: number): Promise<TenantSatisfactionTrend[]> {
   try {
     const db = await getDb();
     if (!db) return [];
@@ -321,6 +321,12 @@ export async function getTenantSatisfactionTrends(months: number = 12): Promise<
       date.setMonth(date.getMonth() - i);
       const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
       const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+      // Build where clause with optional property filter
+      const whereConditions = [gte(tenantSatisfactionSurveys.surveyDate, sql`${monthStart}`), gte(sql`${monthEnd}`, tenantSatisfactionSurveys.surveyDate)];
+      if (propertyId) {
+        whereConditions.push(eq(tenantSatisfactionSurveys.propertyId, propertyId));
+      }
 
       // Get satisfaction data for the month
       const satisfactionData = await db
@@ -335,12 +341,7 @@ export async function getTenantSatisfactionTrends(months: number = 12): Promise<
           recommendCount: sql<number>`SUM(CASE WHEN ${tenantSatisfactionSurveys.wouldRecommend} = true THEN 1 ELSE 0 END) as recommendCount`,
         })
         .from(tenantSatisfactionSurveys)
-        .where(
-          and(
-            gte(tenantSatisfactionSurveys.surveyDate, sql`${monthStart}`),
-            gte(sql`${monthEnd}`, tenantSatisfactionSurveys.surveyDate)
-          )
-        );
+        .where(and(...whereConditions));
 
       const data = satisfactionData[0];
       const surveyCount = data?.surveyCount || 0;

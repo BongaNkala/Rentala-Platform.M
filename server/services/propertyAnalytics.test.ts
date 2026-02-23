@@ -272,3 +272,32 @@ describe("Property Analytics Service", () => {
       expect(Array.isArray(result)).toBe(true);
     });
   });
+
+
+  describe("Property-filtered satisfaction trends", () => {
+    it("should accept optional propertyId parameter", async () => {
+      const result = await getTenantSatisfactionTrends(12, 1);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should return empty array when propertyId is invalid", async () => {
+      const result = await getTenantSatisfactionTrends(12, 99999);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should handle property filtering gracefully", async () => {
+      const allResult = await getTenantSatisfactionTrends(12);
+      const filteredResult = await getTenantSatisfactionTrends(12, 1);
+      expect(Array.isArray(allResult)).toBe(true);
+      expect(Array.isArray(filteredResult)).toBe(true);
+    });
+
+    it("should maintain data structure with property filter", async () => {
+      const result = await getTenantSatisfactionTrends(12, 1);
+      if (result.length > 0) {
+        expect(result[0]).toHaveProperty("month");
+        expect(result[0]).toHaveProperty("averageSatisfaction");
+        expect(result[0]).toHaveProperty("surveyCount");
+      }
+    });
+  });

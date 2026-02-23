@@ -23,6 +23,10 @@ import { trpc } from "@/lib/trpc";
 
 export default function Analytics() {
   const [months, setMonths] = useState(12);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | undefined>(undefined);
+
+  // Fetch properties list for filtering
+  const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
 
   // Fetch analytics data
   const vacancyQuery = trpc.propertyAnalytics.getVacancyTrends.useQuery({ months });
@@ -30,7 +34,7 @@ export default function Analytics() {
   const maintenanceQuery = trpc.propertyAnalytics.getMaintenanceCosts.useQuery();
   const paymentQuery = trpc.propertyAnalytics.getTenantPaymentBehavior.useQuery();
   const performanceQuery = trpc.propertyAnalytics.getPropertyPerformance.useQuery();
-  const satisfactionQuery = trpc.propertyAnalytics.getTenantSatisfactionTrends.useQuery({ months });
+  const satisfactionQuery = trpc.propertyAnalytics.getTenantSatisfactionTrends.useQuery({ months, propertyId: selectedPropertyId });
 
   const COLORS = ["#4361ee", "#7209b7", "#4cc9f0", "#f72585", "#4895ef", "#560bad"];
 
@@ -42,7 +46,20 @@ export default function Analytics() {
           <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
           <p className="text-gray-400 mt-2">Property performance and financial insights</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {/* Property Selector */}
+          <select
+            value={selectedPropertyId || ""}
+            onChange={(e) => setSelectedPropertyId(e.target.value ? parseInt(e.target.value) : undefined)}
+            className="px-3 py-2 bg-purple-900/50 border border-purple-500/30 rounded text-white text-sm focus:outline-none focus:border-purple-500"
+          >
+            <option value="">All Properties</option>
+            {propertiesQuery.data?.map((prop) => (
+              <option key={prop.id} value={prop.id}>
+                {prop.name}
+              </option>
+            ))}
+          </select>
           <Button
             variant={months === 6 ? "default" : "outline"}
             onClick={() => setMonths(6)}
