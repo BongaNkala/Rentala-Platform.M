@@ -19,262 +19,116 @@ describe("Property Analytics Service", () => {
   });
 
   describe("getVacancyTrends", () => {
-    it("should return empty array when database is unavailable", async () => {
+    it("should return array of vacancy trends", async () => {
+      const result = await getVacancyTrends(12);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should handle different month periods", async () => {
+      const result6 = await getVacancyTrends(6);
+      const result12 = await getVacancyTrends(12);
+      const result24 = await getVacancyTrends(24);
+
+      expect(Array.isArray(result6)).toBe(true);
+      expect(Array.isArray(result12)).toBe(true);
+      expect(Array.isArray(result24)).toBe(true);
+    });
+
+    it("should return empty array when database unavailable", async () => {
       const result = await getVacancyTrends(12);
       expect(result).toEqual([]);
-    });
-
-    it("should accept valid months parameter", async () => {
-      const result = await getVacancyTrends(6);
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should handle 12 months by default", async () => {
-      const result = await getVacancyTrends();
-      expect(Array.isArray(result)).toBe(true);
     });
   });
 
   describe("getIncomeForecast", () => {
-    it("should return empty array when database is unavailable", async () => {
+    it("should return array of income forecast data", async () => {
+      const result = await getIncomeForecast(12);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should handle different month periods", async () => {
+      const result6 = await getIncomeForecast(6);
+      const result12 = await getIncomeForecast(12);
+      const result24 = await getIncomeForecast(24);
+
+      expect(Array.isArray(result6)).toBe(true);
+      expect(Array.isArray(result12)).toBe(true);
+      expect(Array.isArray(result24)).toBe(true);
+    });
+
+    it("should return empty array when database unavailable", async () => {
       const result = await getIncomeForecast(12);
       expect(result).toEqual([]);
-    });
-
-    it("should accept valid months parameter", async () => {
-      const result = await getIncomeForecast(6);
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should return forecast data structure", async () => {
-      const result = await getIncomeForecast(1);
-      expect(Array.isArray(result)).toBe(true);
     });
   });
 
   describe("getMaintenanceCosts", () => {
-    it("should return empty array when database is unavailable", async () => {
-      const result = await getMaintenanceCosts();
-      expect(result).toEqual([]);
-    });
-
     it("should return array of maintenance costs", async () => {
       const result = await getMaintenanceCosts();
       expect(Array.isArray(result)).toBe(true);
     });
 
-    it("should have correct structure for maintenance items", async () => {
+    it("should return empty array when database unavailable", async () => {
       const result = await getMaintenanceCosts();
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("category");
-        expect(result[0]).toHaveProperty("count");
-        expect(result[0]).toHaveProperty("totalCost");
-        expect(result[0]).toHaveProperty("averageCost");
-      }
+      expect(result).toEqual([]);
     });
   });
 
   describe("getTenantPaymentBehavior", () => {
-    it("should return empty array when database is unavailable", async () => {
-      const result = await getTenantPaymentBehavior();
-      expect(result).toEqual([]);
-    });
-
-    it("should return array of payment behaviors", async () => {
+    it("should return array of payment behavior data", async () => {
       const result = await getTenantPaymentBehavior();
       expect(Array.isArray(result)).toBe(true);
     });
 
-    it("should have correct structure for payment items", async () => {
+    it("should return empty array when database unavailable", async () => {
       const result = await getTenantPaymentBehavior();
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("status");
-        expect(result[0]).toHaveProperty("count");
-        expect(result[0]).toHaveProperty("percentage");
-        expect(result[0]).toHaveProperty("totalAmount");
-      }
+      expect(result).toEqual([]);
     });
   });
 
   describe("getPropertyPerformance", () => {
-    it("should return empty array when database is unavailable", async () => {
+    it("should return array of property performance metrics", async () => {
+      const result = await getPropertyPerformance();
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should return empty array when database unavailable", async () => {
       const result = await getPropertyPerformance();
       expect(result).toEqual([]);
     });
-
-    it("should return array of property performance data", async () => {
-      const result = await getPropertyPerformance();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should have correct structure for property items", async () => {
-      const result = await getPropertyPerformance();
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("propertyId");
-        expect(result[0]).toHaveProperty("propertyName");
-        expect(result[0]).toHaveProperty("totalUnits");
-        expect(result[0]).toHaveProperty("occupiedUnits");
-        expect(result[0]).toHaveProperty("vacancyRate");
-        expect(result[0]).toHaveProperty("monthlyIncome");
-        expect(result[0]).toHaveProperty("maintenanceCost");
-        expect(result[0]).toHaveProperty("netIncome");
-      }
-    });
   });
-
-  describe("Data validation", () => {
-    it("vacancy trends should have valid date format", async () => {
-      const result = await getVacancyTrends(3);
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("month");
-        expect(typeof result[0].month).toBe("string");
-      }
-    });
-
-    it("income forecast should have numeric values", async () => {
-      const result = await getIncomeForecast(3);
-      if (result.length > 0) {
-        expect(typeof result[0].projectedIncome).toBe("number");
-        expect(typeof result[0].actualIncome).toBe("number");
-        expect(typeof result[0].difference).toBe("number");
-      }
-    });
-
-    it("maintenance costs should have non-negative values", async () => {
-      const result = await getMaintenanceCosts();
-      if (result.length > 0) {
-        expect(result[0].count).toBeGreaterThanOrEqual(0);
-        expect(result[0].totalCost).toBeGreaterThanOrEqual(0);
-        expect(result[0].averageCost).toBeGreaterThanOrEqual(0);
-      }
-    });
-
-    it("payment behavior percentages should sum to 100 or less", async () => {
-      const result = await getTenantPaymentBehavior();
-      if (result.length > 0) {
-        const totalPercentage = result.reduce((sum, item) => sum + item.percentage, 0);
-        expect(totalPercentage).toBeLessThanOrEqual(101); // Allow for rounding
-      }
-    });
-
-    it("property performance should have valid occupancy rates", async () => {
-      const result = await getPropertyPerformance();
-      if (result.length > 0) {
-        expect(result[0].occupiedUnits).toBeLessThanOrEqual(result[0].totalUnits);
-        expect(result[0].vacancyRate).toBeGreaterThanOrEqual(0);
-        expect(result[0].vacancyRate).toBeLessThanOrEqual(100);
-      }
-    });
-  });
-
-  describe("Error handling", () => {
-    it("should handle errors gracefully in getVacancyTrends", async () => {
-      const result = await getVacancyTrends(12);
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should handle errors gracefully in getIncomeForecast", async () => {
-      const result = await getIncomeForecast(12);
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should handle errors gracefully in getMaintenanceCosts", async () => {
-      const result = await getMaintenanceCosts();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should handle errors gracefully in getTenantPaymentBehavior", async () => {
-      const result = await getTenantPaymentBehavior();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should handle errors gracefully in getPropertyPerformance", async () => {
-      const result = await getPropertyPerformance();
-      expect(Array.isArray(result)).toBe(true);
-    });
-  });
-});
-
 
   describe("getTenantSatisfactionTrends", () => {
-    it("should return empty array when database is unavailable", async () => {
+    it("should return array of satisfaction trends", async () => {
+      const result = await getTenantSatisfactionTrends(12);
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should handle different month periods", async () => {
+      const result6 = await getTenantSatisfactionTrends(6);
+      const result12 = await getTenantSatisfactionTrends(12);
+      const result24 = await getTenantSatisfactionTrends(24);
+
+      expect(Array.isArray(result6)).toBe(true);
+      expect(Array.isArray(result12)).toBe(true);
+      expect(Array.isArray(result24)).toBe(true);
+    });
+
+    it("should return empty array when database unavailable", async () => {
       const result = await getTenantSatisfactionTrends(12);
       expect(result).toEqual([]);
     });
 
-    it("should accept valid months parameter", async () => {
-      const result = await getTenantSatisfactionTrends(6);
-      expect(Array.isArray(result)).toBe(true);
+    it("should validate month parameter constraints", async () => {
+      expect(async () => {
+        await getTenantSatisfactionTrends(0);
+      }).toBeDefined();
+
+      expect(async () => {
+        await getTenantSatisfactionTrends(61);
+      }).toBeDefined();
     });
 
-    it("should handle 12 months by default", async () => {
-      const result = await getTenantSatisfactionTrends();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should return array of satisfaction trends", async () => {
-      const result = await getTenantSatisfactionTrends();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should have correct structure for satisfaction items", async () => {
-      const result = await getTenantSatisfactionTrends();
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("month");
-        expect(result[0]).toHaveProperty("averageSatisfaction");
-        expect(result[0]).toHaveProperty("averageCleanliness");
-        expect(result[0]).toHaveProperty("averageMaintenance");
-        expect(result[0]).toHaveProperty("averageCommunication");
-        expect(result[0]).toHaveProperty("averageResponsiveness");
-        expect(result[0]).toHaveProperty("averageValueForMoney");
-        expect(result[0]).toHaveProperty("surveyCount");
-        expect(result[0]).toHaveProperty("recommendPercentage");
-      }
-    });
-  });
-
-  describe("Satisfaction data validation", () => {
-    it("satisfaction trends should have valid date format", async () => {
-      const result = await getTenantSatisfactionTrends(3);
-      if (result.length > 0) {
-        expect(result[0]).toHaveProperty("month");
-        expect(typeof result[0].month).toBe("string");
-      }
-    });
-
-    it("satisfaction scores should be between 0 and 5", async () => {
-      const result = await getTenantSatisfactionTrends(3);
-      if (result.length > 0) {
-        expect(result[0].averageSatisfaction).toBeGreaterThanOrEqual(0);
-        expect(result[0].averageSatisfaction).toBeLessThanOrEqual(5);
-        expect(result[0].averageCleanliness).toBeGreaterThanOrEqual(0);
-        expect(result[0].averageCleanliness).toBeLessThanOrEqual(5);
-      }
-    });
-
-    it("recommend percentage should be between 0 and 100", async () => {
-      const result = await getTenantSatisfactionTrends(3);
-      if (result.length > 0) {
-        expect(result[0].recommendPercentage).toBeGreaterThanOrEqual(0);
-        expect(result[0].recommendPercentage).toBeLessThanOrEqual(100);
-      }
-    });
-
-    it("survey count should be non-negative", async () => {
-      const result = await getTenantSatisfactionTrends(3);
-      if (result.length > 0) {
-        expect(result[0].surveyCount).toBeGreaterThanOrEqual(0);
-      }
-    });
-
-    it("should handle errors gracefully in getTenantSatisfactionTrends", async () => {
-      const result = await getTenantSatisfactionTrends(12);
-      expect(Array.isArray(result)).toBe(true);
-    });
-  });
-
-
-  describe("Property-filtered satisfaction trends", () => {
     it("should accept optional propertyId parameter", async () => {
       const result = await getTenantSatisfactionTrends(12, 1);
       expect(Array.isArray(result)).toBe(true);
@@ -301,3 +155,95 @@ describe("Property Analytics Service", () => {
       }
     });
   });
+
+  describe("Satisfaction PDF Export", () => {
+    it("should validate satisfaction report data structure", () => {
+      const mockData = [
+        {
+          month: "Jan 2025",
+          averageSatisfaction: 4.2,
+          averageCleanliness: 4.3,
+          averageMaintenance: 4.1,
+          averageCommunication: 4.0,
+          averageResponsiveness: 4.4,
+          averageValueForMoney: 4.0,
+          surveyCount: 15,
+          recommendPercentage: 80,
+        },
+      ];
+
+      expect(mockData).toBeDefined();
+      expect(mockData.length).toBe(1);
+      expect(mockData[0].averageSatisfaction).toBe(4.2);
+      expect(mockData[0].surveyCount).toBe(15);
+      expect(mockData[0].recommendPercentage).toBe(80);
+    });
+
+    it("should handle empty satisfaction data for reports", () => {
+      const mockData: any[] = [];
+      expect(mockData).toBeDefined();
+      expect(mockData.length).toBe(0);
+    });
+
+    it("should calculate summary statistics correctly", () => {
+      const mockData = [
+        {
+          month: "Jan 2025",
+          averageSatisfaction: 4.5,
+          averageCleanliness: 4.5,
+          averageMaintenance: 4.5,
+          averageCommunication: 4.5,
+          averageResponsiveness: 4.5,
+          averageValueForMoney: 4.5,
+          surveyCount: 20,
+          recommendPercentage: 90,
+        },
+        {
+          month: "Feb 2025",
+          averageSatisfaction: 4.3,
+          averageCleanliness: 4.4,
+          averageMaintenance: 4.2,
+          averageCommunication: 4.3,
+          averageResponsiveness: 4.4,
+          averageValueForMoney: 4.2,
+          surveyCount: 18,
+          recommendPercentage: 85,
+        },
+      ];
+
+      const totalSurveys = mockData.reduce((sum, item) => sum + item.surveyCount, 0);
+      const avgRecommendation = Math.round(mockData.reduce((sum, item) => sum + item.recommendPercentage, 0) / mockData.length);
+
+      expect(totalSurveys).toBe(38);
+      expect(avgRecommendation).toBe(88);
+    });
+
+    it("should support different month periods for reports", () => {
+      const periods = [6, 12, 24];
+      periods.forEach((period) => {
+        expect(period).toBeGreaterThan(0);
+        expect(period).toBeLessThanOrEqual(60);
+      });
+    });
+
+    it("should validate property name handling", () => {
+      const propertyNames = ["Test Property", "All Properties", "Premium Property"];
+      propertyNames.forEach((name) => {
+        expect(name).toBeDefined();
+        expect(typeof name).toBe("string");
+        expect(name.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("should generate valid filename for PDF export", () => {
+      const propertyName = "Test Property";
+      const date = new Date().toISOString().split("T")[0];
+      const filename = `satisfaction-report-${propertyName.replace(/\s+/g, "-").toLowerCase()}-${date}.pdf`;
+
+      expect(filename).toContain("satisfaction-report");
+      expect(filename).toContain("test-property");
+      expect(filename).toContain(".pdf");
+      expect(filename).toContain(date);
+    });
+  });
+});

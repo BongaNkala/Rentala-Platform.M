@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { properties } from "../../drizzle/schema";
@@ -10,6 +11,7 @@ import {
   getPropertyPerformance,
   getTenantSatisfactionTrends,
 } from "../services/propertyAnalytics";
+import { generateSatisfactionReportPDFBuffer } from "../services/satisfactionReportPdf";
 
 export const propertyAnalyticsRouter = router({
   /**
@@ -78,5 +80,38 @@ export const propertyAnalyticsRouter = router({
       return [];
     }
   }),
+
+  exportSatisfactionReport: publicProcedure
+    .input(z.object({ months: z.number().min(1).max(60).default(12), propertyId: z.number().optional() }))
+    .mutation(async ({ input }) => {
+      try {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        let propertyName = "All Properties";
+        if (input.propertyId) {
+          const propsResult = await db
+            .select({ name: properties.name })
+            .from(properties)
+            .where(eq(properties.id, input.propertyId))
+            .limit(1);
+          if (propsResult.length > 0) {
+            propertyName = propsResult[0].name;
+          }
+        }
+
+        const satisfactionData = await getTenantSatisfactionTrends(input.months, input.propertyId);
+        const pdfBuffer = await generateSatisfactionReportPDFBuffer(propertyName, satisfactionData, input.months);
+
+        return {
+          success: true,
+          pdf: pdfBuffer.toString("base64"),
+          filename: `satisfaction-report-${propertyName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`,
+        };
+      } catch (error) {
+        console.error("Failed to export satisfaction report:", error);
+        throw new Error("Failed to generate satisfaction report PDF");
+      }
+    }),
 });
 

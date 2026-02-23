@@ -24,9 +24,11 @@ import { trpc } from "@/lib/trpc";
 export default function Analytics() {
   const [months, setMonths] = useState(12);
   const [selectedPropertyId, setSelectedPropertyId] = useState<number | undefined>(undefined);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch properties list for filtering
   const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
+  const exportMutation = trpc.propertyAnalytics.exportSatisfactionReport.useMutation();
 
   // Fetch analytics data
   const vacancyQuery = trpc.propertyAnalytics.getVacancyTrends.useQuery({ months });
@@ -278,6 +280,34 @@ export default function Analytics() {
 
         {/* Tenant Satisfaction Tab */}
         <TabsContent value="satisfaction" className="space-y-4">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={async () => {
+                setIsExporting(true);
+                try {
+                  const result = await exportMutation.mutateAsync({
+                    months,
+                    propertyId: selectedPropertyId,
+                  });
+                  if (result.success) {
+                    const link = document.createElement("a");
+                    link.href = `data:application/pdf;base64,${result.pdf}`;
+                    link.download = result.filename;
+                    link.click();
+                  }
+                } catch (error) {
+                  console.error("Failed to export report:", error);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting || satisfactionQuery.isLoading}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {isExporting ? "Generating PDF..." : "Export as PDF"}
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-purple-900/30 border border-purple-500/30 p-6 lg:col-span-2">
               <h2 className="text-xl font-semibold text-white mb-4">Overall Satisfaction Trends</h2>
