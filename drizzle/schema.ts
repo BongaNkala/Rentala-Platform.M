@@ -481,3 +481,28 @@ export const userPreferences = mysqlTable("user_preferences", {
 
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = typeof userPreferences.$inferInsert;
+
+
+/**
+ * Preference version history for auditing and restoration
+ * Stores snapshots of user preferences over time
+ */
+export const preferenceVersions = mysqlTable("preference_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  versionNumber: int("versionNumber").notNull(), // Sequential version number per user
+  metrics: text("metrics").notNull(), // JSON array of selected metrics
+  defaultFrequency: mysqlEnum("defaultFrequency", ["weekly", "biweekly", "monthly", "quarterly", "annually"]).notNull(),
+  defaultHour: int("defaultHour").notNull(),
+  defaultMinute: int("defaultMinute").notNull(),
+  defaultDayOfMonth: int("defaultDayOfMonth").notNull(),
+  changeDescription: varchar("changeDescription", { length: 255 }), // Optional description of what changed
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("version_user_idx").on(table.userId),
+  versionIdx: index("version_number_idx").on(table.userId, table.versionNumber),
+  createdAtIdx: index("version_created_idx").on(table.createdAt),
+}));
+
+export type PreferenceVersion = typeof preferenceVersions.$inferSelect;
+export type InsertPreferenceVersion = typeof preferenceVersions.$inferInsert;

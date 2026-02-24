@@ -803,3 +803,59 @@ All functionality implemented and tested:
 - 16 new unit tests for preference service validation
 - All 119 tests passing with zero TypeScript errors
 - Preferences now sync automatically across devices
+
+
+## Phase 2 (Continued): Preference Version History
+
+### Database Schema
+- [ ] Create preference_versions table with userId, version number, metrics, schedule, timestamp
+- [ ] Add indexes for userId and createdAt for fast lookups
+- [ ] Add migration for new table
+- [ ] Define TypeScript types for version data
+
+### Backend Service
+- [ ] Create version history service functions
+- [ ] Implement savePreferenceVersion function
+- [ ] Implement getPreferenceVersions function
+- [ ] Implement restorePreferenceVersion function
+- [ ] Implement deleteOldVersions function (keep last 20)
+- [ ] Add automatic versioning on preference save
+
+### tRPC Endpoints
+- [ ] Create preferences.getVersions endpoint
+- [ ] Create preferences.restoreVersion endpoint
+- [ ] Create preferences.deleteVersion endpoint
+- [ ] Add authentication checks
+- [ ] Add input validation
+
+### Frontend UI
+- [ ] Add version history modal/panel to Analytics
+- [ ] Display list of preference versions with timestamps
+- [ ] Show diff between versions (what changed)
+- [ ] Add restore button for each version
+- [ ] Add delete button for old versions
+- [ ] Show current version indicator
+
+### Testing
+- [ ] Test version creation and retrieval
+- [ ] Test version restoration
+- [ ] Test version deletion
+- [ ] Test automatic cleanup of old versions
+- [ ] Test diff calculation
+
+### Status
+- [ ] Preference version history feature in progress
+
+## COMPLETED: Preference Version History
+
+All functionality implemented and tested:
+- Created preference_versions table with userId, versionNumber, metrics, schedule, and timestamps
+- Implemented version service with save, get, restore, delete, and cleanup functions
+- Added automatic versioning on preference save (keeps last 20 versions)
+- Created tRPC endpoints for getVersions, restore, delete, and getDiff
+- Added Preference History tab to Analytics dashboard
+- Displays version list with timestamps, descriptions, and metrics
+- Restore and delete buttons for each version
+- Version diff calculation for detecting metric, frequency, and time changes
+- 14 new unit tests for version service validation
+- All 133 tests passing with zero TypeScript errors

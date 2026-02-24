@@ -54,10 +54,18 @@ export default function Analytics() {
   const schedulePrefs = useSchedulePreferences();
   const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(metricPrefs.selectedMetrics);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('idle');
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+  const [restoreMessage, setRestoreMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   // Server preference queries
   const serverPrefsQuery = trpc.userPreferences.get.useQuery();
   const savePreferencesMutation = trpc.userPreferences.save.useMutation();
+  
+  // Version history queries
+  const versionsQuery = trpc.preferenceVersions.getVersions.useQuery();
+  const restoreVersionMutation = trpc.preferenceVersions.restore.useMutation();
+  const deleteVersionMutation = trpc.preferenceVersions.delete.useMutation();
   const [scheduleForm, setScheduleForm] = useState({
     name: "",
     description: "",
@@ -238,6 +246,7 @@ export default function Analytics() {
           <TabsTrigger value="payments">Payment Behavior</TabsTrigger>
           <TabsTrigger value="satisfaction">Tenant Satisfaction</TabsTrigger>
           <TabsTrigger value="schedules">Report Schedules</TabsTrigger>
+          <TabsTrigger value="versions">Preference History</TabsTrigger>
         </TabsList>
 
         {/* Vacancy Trends Tab */}
@@ -874,6 +883,76 @@ export default function Analytics() {
               No schedules yet. Create one to start receiving automated reports.
             </Card>
           )}
+        </TabsContent>
+
+        {/* Preference History Tab */}
+        <TabsContent value="versions" className="space-y-4">
+          {restoreMessage && (
+            <Card className={`p-4 ${restoreMessage.type === 'success' ? 'bg-green-900/30 border-green-500/30' : 'bg-red-900/30 border-red-500/30'}`}>
+              <p className={restoreMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+                {restoreMessage.text}
+              </p>
+            </Card>
+          )}
+          
+          <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Preference Version History</h2>
+            {versionsQuery.isLoading ? (
+              <div className="text-gray-400">Loading version history...</div>
+            ) : versionsQuery.data && versionsQuery.data.length > 0 ? (
+              <div className="space-y-2">
+                {versionsQuery.data.map((version) => (
+                  <div key={version.id} className="bg-purple-800/30 border border-purple-500/20 p-4 rounded flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="text-white font-medium">Version {version.versionNumber}</p>
+                      <p className="text-sm text-gray-400">{version.createdAt}</p>
+                      {version.changeDescription && (
+                        <p className="text-sm text-gray-300 mt-1">{version.changeDescription}</p>
+                      )}
+                      <p className="text-sm text-gray-400 mt-2">
+                        Metrics: {version.metrics.join(", ")}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            await restoreVersionMutation.mutateAsync({ versionId: version.id });
+                          } catch (error) {
+                            console.error("Failed to restore version", error);
+                          }
+                        }}
+                      >
+                        Restore
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-400 border-red-500/30 hover:bg-red-900/20"
+                        onClick={async () => {
+                          if (confirm("Delete this version?")) {
+                            try {
+                              await deleteVersionMutation.mutateAsync({ versionId: version.id });
+                            } catch (error) {
+                              console.error("Failed to delete version", error);
+                            }
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-purple-900/30 border border-purple-500/30 p-6 text-center text-gray-400">
+                No preference versions yet. Your preferences will be saved as you make changes.
+              </Card>
+            )}
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

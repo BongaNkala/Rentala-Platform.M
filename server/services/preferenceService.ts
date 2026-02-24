@@ -1,6 +1,7 @@
 import { getDb } from "../db";
 import { userPreferences } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { savePreferenceVersion } from "./preferenceVersionService";
 
 export interface MetricPreferences {
   selectedMetrics: string[];
@@ -96,6 +97,9 @@ export async function saveUserPreferences(
         defaultDayOfMonth: preferences.schedule.defaultDayOfMonth,
       });
     }
+
+    // Auto-save version for history
+    await savePreferenceVersion(userId, preferences);
 
     return true;
   } catch (error) {

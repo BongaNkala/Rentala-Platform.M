@@ -17,6 +17,7 @@ import { videoAnalyticsRouter } from "./routers/videoAnalytics";
 import { propertyAnalyticsRouter } from "./routers/propertyAnalytics";
 import { reportSchedulesRouter } from "./routers/reportSchedules";
 import { userPreferencesRouter } from "./routers/userPreferences";
+import { preferenceVersionsRouter } from "./routers/preferenceVersions";
 
 export const appRouter = router({
   // Core system routes
@@ -50,6 +51,7 @@ export const appRouter = router({
   propertyAnalytics: propertyAnalyticsRouter,
   reportSchedules: reportSchedulesRouter,
   userPreferences: userPreferencesRouter,
+  preferenceVersions: preferenceVersionsRouter,
 });
 
 export type AppRouter = typeof appRouter;
