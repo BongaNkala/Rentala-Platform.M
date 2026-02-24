@@ -401,3 +401,59 @@ export const tenantSatisfactionSurveys = mysqlTable("tenant_satisfaction_surveys
 
 export type TenantSatisfactionSurvey = typeof tenantSatisfactionSurveys.$inferSelect;
 export type InsertTenantSatisfactionSurvey = typeof tenantSatisfactionSurveys.$inferInsert;
+
+
+/**
+ * Scheduled report delivery configuration
+ */
+export const reportSchedules = mysqlTable("report_schedules", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  propertyId: int("propertyId"),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  frequency: mysqlEnum("frequency", ["weekly", "biweekly", "monthly", "quarterly", "annually"]).notNull(),
+  dayOfWeek: int("dayOfWeek"), // 0-6 for weekly schedules
+  dayOfMonth: int("dayOfMonth"), // 1-31 for monthly schedules
+  hour: int("hour").default(9), // Hour of day to send (0-23)
+  minute: int("minute").default(0), // Minute of hour (0-59)
+  recipientEmails: text("recipientEmails").notNull(), // JSON array of email addresses
+  metrics: text("metrics").notNull(), // JSON array of selected metrics
+  status: mysqlEnum("status", ["active", "paused", "completed"]).default("active").notNull(),
+  lastSentAt: timestamp("lastSentAt"),
+  nextSendAt: timestamp("nextSendAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("schedule_user_idx").on(table.userId),
+  propertyIdIdx: index("schedule_property_idx").on(table.propertyId),
+  statusIdx: index("schedule_status_idx").on(table.status),
+  nextSendIdx: index("schedule_next_send_idx").on(table.nextSendAt),
+}));
+
+export type ReportSchedule = typeof reportSchedules.$inferSelect;
+export type InsertReportSchedule = typeof reportSchedules.$inferInsert;
+
+/**
+ * Report delivery history and tracking
+ */
+export const reportDeliveryHistory = mysqlTable("report_delivery_history", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduleId: int("scheduleId").notNull(),
+  userId: int("userId").notNull(),
+  propertyId: int("propertyId"),
+  recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
+  status: mysqlEnum("status", ["pending", "sent", "failed", "bounced"]).default("pending").notNull(),
+  errorMessage: text("errorMessage"),
+  pdfUrl: varchar("pdfUrl", { length: 512 }),
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  scheduleIdIdx: index("delivery_schedule_idx").on(table.scheduleId),
+  userIdIdx: index("delivery_user_idx").on(table.userId),
+  statusIdx: index("delivery_status_idx").on(table.status),
+  sentAtIdx: index("delivery_sent_idx").on(table.sentAt),
+}));
+
+export type ReportDeliveryHistory = typeof reportDeliveryHistory.$inferSelect;
+export type InsertReportDeliveryHistory = typeof reportDeliveryHistory.$inferInsert;

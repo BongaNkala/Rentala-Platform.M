@@ -632,3 +632,45 @@ For questions or issues, please refer to the GitHub repository or contact the de
 
 ### Status
 - [x] Customizable PDF report feature complete
+
+
+## Phase 2 (Continued): Scheduled Email Report Delivery
+
+### Database Schema
+- [x] Create report_schedules table with schedule configuration
+- [x] Create report_delivery_history table for tracking sent reports
+- [x] Add columns for frequency, recipients, metrics, property selection
+- [x] Add status tracking (active, paused, completed)
+
+### Backend Job Scheduler
+- [x] Implement job scheduler for recurring report generation
+- [x] Create email service integration
+- [x] Add report generation and delivery logic
+- [x] Implement error handling and retry logic
+- [x] Add logging for delivery tracking
+
+### tRPC Endpoints
+- [x] Create schedule management endpoints (create, read, update, delete)
+- [x] Add endpoint to list all active schedules
+- [x] Add endpoint to get delivery history
+- [x] Add endpoint to test send report
+- [x] Add endpoint to pause/resume schedules
+
+### Frontend UI
+- [x] Create schedule management form
+- [x] Add schedule list view with status indicators
+- [x] Implement frequency selector (weekly, biweekly, monthly, quarterly, annually)
+- [x] Add recipient email input with validation
+- [x] Integrate metric selector with schedule form
+- [x] Add test send button
+- [x] Add delete schedule functionality
+
+### Testing
+- [x] Test schedule creation and validation
+- [x] Test schedule time calculation
+- [x] Test schedule activation/deactivation
+- [x] Added 15 unit tests for report scheduler
+- [x] All 103 tests passing (15 scheduler tests)
+
+### Status
+- [x] Scheduled email delivery feature complete

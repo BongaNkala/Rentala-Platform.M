@@ -40,10 +40,24 @@ export default function Analytics() {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"]);
   const [showMetricSelector, setShowMetricSelector] = useState(false);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    name: "",
+    description: "",
+    frequency: "monthly" as const,
+    recipientEmails: "",
+    dayOfMonth: 1,
+    hour: 9,
+    minute: 0,
+  });
 
   // Fetch properties list for filtering
   const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
   const exportMutation = trpc.propertyAnalytics.exportSatisfactionReport.useMutation();
+  const schedulesQuery = trpc.reportSchedules.getSchedules.useQuery();
+  const createScheduleMutation = trpc.reportSchedules.createSchedule.useMutation();
+  const testSendMutation = trpc.reportSchedules.testSendReport.useMutation();
+  const deleteScheduleMutation = trpc.reportSchedules.deleteSchedule.useMutation();
 
   // Fetch analytics data
   const vacancyQuery = trpc.propertyAnalytics.getVacancyTrends.useQuery({ months });
@@ -103,12 +117,13 @@ export default function Analytics() {
 
       {/* Tabs */}
       <Tabs defaultValue="vacancy" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-purple-900/50 border border-purple-500/30">
+        <TabsList className="grid w-full grid-cols-6 bg-purple-900/50 border border-purple-500/30">
           <TabsTrigger value="vacancy">Vacancy Trends</TabsTrigger>
           <TabsTrigger value="income">Income Forecast</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance Costs</TabsTrigger>
           <TabsTrigger value="payments">Payment Behavior</TabsTrigger>
           <TabsTrigger value="satisfaction">Tenant Satisfaction</TabsTrigger>
+          <TabsTrigger value="schedules">Report Schedules</TabsTrigger>
         </TabsList>
 
         {/* Vacancy Trends Tab */}
@@ -484,60 +499,239 @@ export default function Analytics() {
             </Card>
           </div>
         </TabsContent>
-      </Tabs>
 
-      {/* Property Performance */}
-      <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Property Performance</h2>
-        {performanceQuery.isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-purple-800/30 rounded animate-pulse" />
-            ))}
-          </div>
-        ) : performanceQuery.data ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-purple-500/30">
-                  <th className="text-left py-3 px-4 text-gray-400">Property</th>
-                  <th className="text-center py-3 px-4 text-gray-400">Units</th>
-                  <th className="text-center py-3 px-4 text-gray-400">Occupancy</th>
-                  <th className="text-center py-3 px-4 text-gray-400">Vacancy Rate</th>
-                  <th className="text-right py-3 px-4 text-gray-400">Monthly Income</th>
-                  <th className="text-right py-3 px-4 text-gray-400">Maintenance</th>
-                  <th className="text-right py-3 px-4 text-gray-400">Net Income</th>
-                </tr>
-              </thead>
-              <tbody>
-                {performanceQuery.data.map((prop) => (
-                  <tr key={prop.propertyId} className="border-b border-purple-500/20 hover:bg-purple-800/20">
-                    <td className="py-3 px-4 text-white">{prop.propertyName}</td>
-                    <td className="text-center py-3 px-4 text-gray-300">{prop.totalUnits}</td>
-                    <td className="text-center py-3 px-4 text-gray-300">
-                      {prop.occupiedUnits}/{prop.totalUnits}
-                    </td>
-                    <td className="text-center py-3 px-4">
-                      <span className={prop.vacancyRate > 20 ? "text-red-400" : "text-green-400"}>
-                        {prop.vacancyRate.toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="text-right py-3 px-4 text-cyan-400">
-                      R {prop.monthlyIncome.toLocaleString()}
-                    </td>
-                    <td className="text-right py-3 px-4 text-orange-400">
-                      R {prop.maintenanceCost.toLocaleString()}
-                    </td>
-                    <td className="text-right py-3 px-4 text-green-400 font-semibold">
-                      R {prop.netIncome.toLocaleString()}
-                    </td>
+      {/* Property Performance Tab */}
+      <TabsContent value="performance" className="space-y-4">
+        <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Property Performance</h2>
+          {performanceQuery.isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 bg-purple-800/30 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : performanceQuery.data ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-purple-500/30">
+                    <th className="text-left py-3 px-4 text-gray-400">Property</th>
+                    <th className="text-center py-3 px-4 text-gray-400">Units</th>
+                    <th className="text-center py-3 px-4 text-gray-400">Occupancy</th>
+                    <th className="text-center py-3 px-4 text-gray-400">Vacancy Rate</th>
+                    <th className="text-right py-3 px-4 text-gray-400">Monthly Income</th>
+                    <th className="text-right py-3 px-4 text-gray-400">Maintenance</th>
+                    <th className="text-right py-3 px-4 text-gray-400">Net Income</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {performanceQuery.data.map((prop) => (
+                    <tr key={prop.propertyId} className="border-b border-purple-500/20 hover:bg-purple-800/20">
+                      <td className="py-3 px-4 text-white">{prop.propertyName}</td>
+                      <td className="text-center py-3 px-4 text-gray-300">{prop.totalUnits}</td>
+                      <td className="text-center py-3 px-4 text-gray-300">
+                        {prop.occupiedUnits}/{prop.totalUnits}
+                      </td>
+                      <td className="text-center py-3 px-4">
+                        <span className={prop.vacancyRate > 20 ? "text-red-400" : "text-green-400"}>
+                          {prop.vacancyRate.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="text-right py-3 px-4 text-cyan-400">
+                        R {prop.monthlyIncome.toLocaleString()}
+                      </td>
+                      <td className="text-right py-3 px-4 text-orange-400">
+                        R {prop.maintenanceCost.toLocaleString()}
+                      </td>
+                      <td className="text-right py-3 px-4 text-green-400 font-semibold">
+                        R {prop.netIncome.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </Card>
+      </TabsContent>
+
+      {/* Report Schedules Tab */}
+      <TabsContent value="schedules" className="space-y-4">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => setShowScheduleForm(!showScheduleForm)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {showScheduleForm ? "Cancel" : "Create Schedule"}
+            </Button>
           </div>
-        ) : null}
-      </Card>
+
+          {showScheduleForm && (
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-white">Create Report Schedule</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">Schedule Name</label>
+                  <input
+                    type="text"
+                    value={scheduleForm.name}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, name: e.target.value })}
+                    className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                    placeholder="e.g., Monthly Satisfaction Report"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">Frequency</label>
+                  <select
+                    value={scheduleForm.frequency}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, frequency: e.target.value as any })}
+                    className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Bi-weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="annually">Annually</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Recipient Emails (comma-separated)</label>
+                <input
+                  type="text"
+                  value={scheduleForm.recipientEmails}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, recipientEmails: e.target.value })}
+                  className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                  placeholder="email1@example.com, email2@example.com"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">Day of Month</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={scheduleForm.dayOfMonth}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, dayOfMonth: parseInt(e.target.value) })}
+                    className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">Hour</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={scheduleForm.hour}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, hour: parseInt(e.target.value) })}
+                    className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">Minute</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={scheduleForm.minute}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, minute: parseInt(e.target.value) })}
+                    className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={async () => {
+                  const emails = scheduleForm.recipientEmails.split(",").map((e) => e.trim()).filter((e) => e);
+                  if (emails.length === 0) {
+                    alert("Please enter at least one recipient email");
+                    return;
+                  }
+                  try {
+                    await createScheduleMutation.mutateAsync({
+                      name: scheduleForm.name,
+                      description: scheduleForm.description,
+                      frequency: scheduleForm.frequency,
+                      recipientEmails: emails,
+                      metrics: selectedMetrics,
+                      propertyId: selectedPropertyId,
+                      dayOfMonth: scheduleForm.dayOfMonth,
+                      hour: scheduleForm.hour,
+                      minute: scheduleForm.minute,
+                    });
+                    setShowScheduleForm(false);
+                    setScheduleForm({ name: "", description: "", frequency: "monthly", recipientEmails: "", dayOfMonth: 1, hour: 9, minute: 0 });
+                    await schedulesQuery.refetch();
+                  } catch (error) {
+                    alert("Failed to create schedule");
+                  }
+                }}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+              >
+                Create Schedule
+              </Button>
+            </Card>
+          )}
+
+          {schedulesQuery.isLoading ? (
+            <div className="text-center text-gray-400">Loading schedules...</div>
+          ) : schedulesQuery.data && schedulesQuery.data.length > 0 ? (
+            <div className="space-y-4">
+              {schedulesQuery.data.map((schedule) => (
+                <Card key={schedule.id} className="bg-purple-900/30 border border-purple-500/30 p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="text-lg font-semibold text-white">{schedule.name}</h4>
+                      <p className="text-sm text-gray-400">{schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)} • Next: {schedule.nextSendAt ? new Date(schedule.nextSendAt).toLocaleDateString() : "N/A"}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            await testSendMutation.mutateAsync({ scheduleId: schedule.id });
+                            alert("Test report sent successfully");
+                          } catch (error) {
+                            alert("Failed to send test report");
+                          }
+                        }}
+                      >
+                        Test Send
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-400 border-red-500/30 hover:bg-red-900/20"
+                        onClick={async () => {
+                          if (confirm("Are you sure you want to delete this schedule?")) {
+                            try {
+                              await deleteScheduleMutation.mutateAsync({ scheduleId: schedule.id });
+                              await schedulesQuery.refetch();
+                            } catch (error) {
+                              alert("Failed to delete schedule");
+                            }
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    <p>Recipients: {(schedule.recipientEmails as string[]).join(", ")}</p>
+                    <p>Metrics: {(schedule.metrics as string[]).join(", ")}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-purple-900/30 border border-purple-500/30 p-6 text-center text-gray-400">
+              No schedules yet. Create one to start receiving automated reports.
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
