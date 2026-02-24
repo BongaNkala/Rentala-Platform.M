@@ -457,3 +457,27 @@ export const reportDeliveryHistory = mysqlTable("report_delivery_history", {
 
 export type ReportDeliveryHistory = typeof reportDeliveryHistory.$inferSelect;
 export type InsertReportDeliveryHistory = typeof reportDeliveryHistory.$inferInsert;
+
+
+/**
+ * User preferences for analytics and reporting
+ * Stores metric selections and schedule defaults per user
+ */
+export const userPreferences = mysqlTable("user_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  metrics: text("metrics").notNull(), // JSON array of selected metrics
+  defaultFrequency: mysqlEnum("defaultFrequency", ["weekly", "biweekly", "monthly", "quarterly", "annually"]).default("monthly").notNull(),
+  defaultHour: int("defaultHour").default(9).notNull(), // 0-23
+  defaultMinute: int("defaultMinute").default(0).notNull(), // 0-59
+  defaultDayOfMonth: int("defaultDayOfMonth").default(1).notNull(), // 1-31
+  syncedAt: timestamp("syncedAt").defaultNow().onUpdateNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("preferences_user_idx").on(table.userId),
+  syncedAtIdx: index("preferences_synced_idx").on(table.syncedAt),
+}));
+
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = typeof userPreferences.$inferInsert;

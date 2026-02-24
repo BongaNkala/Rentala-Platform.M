@@ -752,3 +752,54 @@ All functionality implemented and tested:
 - Error handling and user feedback
 - 18 unit tests for export/import utilities
 - All 103 tests passing with zero TypeScript errors
+
+
+## Phase 2 (Continued): Server-Side Preference Storage
+
+### Database Schema
+- [ ] Create user_preferences table with userId, metrics, schedule, timestamps
+- [ ] Add indexes for fast lookups by userId
+- [ ] Add migration for new table
+- [ ] Define TypeScript types for preference data
+
+### Backend Service
+- [ ] Create preference service for CRUD operations
+- [ ] Implement savePreferences function
+- [ ] Implement getPreferences function
+- [ ] Implement deletePreferences function
+- [ ] Add error handling and validation
+
+### tRPC Endpoints
+- [ ] Create preferences.save endpoint
+- [ ] Create preferences.get endpoint
+- [ ] Create preferences.delete endpoint
+- [ ] Add authentication checks
+- [ ] Add input validation
+
+### Frontend Integration
+- [ ] Load preferences from server on component mount
+- [ ] Sync local changes to server automatically
+- [ ] Handle sync conflicts (server vs local)
+- [ ] Show sync status to user
+- [ ] Fallback to localStorage if server unavailable
+
+### Testing
+- [ ] Test preference save and retrieval
+- [ ] Test multi-device sync scenario
+- [ ] Test conflict resolution
+- [ ] Test error handling
+
+### Status
+- [ ] Server-side preference storage in progress
+
+## COMPLETED: Server-Side Preference Storage with Auto-Sync
+
+All functionality implemented and tested:
+- Created user_preferences database table with userId, metrics, schedule, timestamps
+- Implemented preference service with CRUD operations
+- Added tRPC endpoints for get, save, delete, and shouldSync
+- Integrated server sync into Analytics component with auto-save
+- Automatic sync on component mount and when preferences change
+- 16 new unit tests for preference service validation
+- All 119 tests passing with zero TypeScript errors
+- Preferences now sync automatically across devices

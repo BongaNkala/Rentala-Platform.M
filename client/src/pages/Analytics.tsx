@@ -19,7 +19,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useMetricPreferences, useSchedulePreferences } from "@/hooks/useMetricPreferences";
 import { exportPreferences, generateExportFilename, downloadPreferencesFile, parseImportedPreferences, mergePreferences, replacePreferences } from "@/utils/preferenceExport";
@@ -53,6 +53,11 @@ export default function Analytics() {
   const metricPrefs = useMetricPreferences();
   const schedulePrefs = useSchedulePreferences();
   const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(metricPrefs.selectedMetrics);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('idle');
+  
+  // Server preference queries
+  const serverPrefsQuery = trpc.userPreferences.get.useQuery();
+  const savePreferencesMutation = trpc.userPreferences.save.useMutation();
   const [scheduleForm, setScheduleForm] = useState({
     name: "",
     description: "",
@@ -121,6 +126,44 @@ export default function Analytics() {
     };
     reader.readAsText(file);
   };
+
+  // Sync preferences on mount
+  useEffect(() => {
+    const syncPreferences = async () => {
+      if (!serverPrefsQuery.data) return;
+      setSyncStatus('syncing');
+      try {
+        // Load server preferences if available
+        if (serverPrefsQuery.data) {
+          setSelectedMetrics(serverPrefsQuery.data.metrics.selectedMetrics as ReportMetric[]);
+        }
+        setSyncStatus('synced');
+      } catch (error) {
+        console.error('Failed to sync preferences:', error);
+        setSyncStatus('idle');
+      }
+    };
+    syncPreferences();
+  }, [serverPrefsQuery.data]);
+  
+  // Auto-save preferences to server when they change
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (selectedMetrics.length > 0) {
+        await savePreferencesMutation.mutateAsync({
+          metrics: { selectedMetrics, lastUpdated: Date.now() },
+          schedule: {
+            defaultFrequency: scheduleForm.frequency as any,
+            defaultHour: scheduleForm.hour,
+            defaultMinute: scheduleForm.minute,
+            defaultDayOfMonth: scheduleForm.dayOfMonth,
+            lastUpdated: Date.now(),
+          },
+        });
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [selectedMetrics, scheduleForm]);
 
   // Fetch properties list for filtering
   const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
