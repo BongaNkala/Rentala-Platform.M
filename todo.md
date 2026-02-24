@@ -707,3 +707,48 @@ For questions or issues, please refer to the GitHub repository or contact the de
 
 ### Status
 - [x] localStorage persistence feature complete
+
+
+## Phase 2 (Continued): Preference Import/Export
+
+### Export Functionality
+- [ ] Create preference export utility function
+- [ ] Generate JSON with metric and schedule preferences
+- [ ] Add export timestamp and version info
+- [ ] Trigger browser download of JSON file
+- [ ] Add export button to Analytics UI
+
+### Import Functionality
+- [ ] Create preference import utility function
+- [ ] Validate imported JSON structure and format
+- [ ] Handle version compatibility checks
+- [ ] Merge or replace preferences based on user choice
+- [ ] Add import file input to Analytics UI
+- [ ] Show import preview/confirmation dialog
+
+### File Handling
+- [ ] Generate meaningful filenames with timestamps
+- [ ] Handle file upload and parsing
+- [ ] Error handling for invalid JSON
+- [ ] User feedback on import success/failure
+- [ ] Support for drag-and-drop file upload
+
+### Testing
+- [ ] Test export generates valid JSON
+- [ ] Test import with valid preferences file
+- [ ] Test import with invalid/corrupted JSON
+- [ ] Test version compatibility handling
+- [ ] Test merge vs replace functionality
+
+### Status
+- [ ] Preference import/export feature in progress
+
+## COMPLETED: Preference Import/Export Feature
+
+All functionality implemented and tested:
+- Export preferences as JSON with timestamp and version
+- Import preferences from JSON file with validation
+- Version compatibility checking
+- Error handling and user feedback
+- 18 unit tests for export/import utilities
+- All 103 tests passing with zero TypeScript errors

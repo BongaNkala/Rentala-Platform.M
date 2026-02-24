@@ -19,8 +19,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { useMetricPreferences, useSchedulePreferences } from "@/hooks/useMetricPreferences";
+import { exportPreferences, generateExportFilename, downloadPreferencesFile, parseImportedPreferences, mergePreferences, replacePreferences } from "@/utils/preferenceExport";
 
 type ReportMetric = "overall" | "cleanliness" | "maintenance" | "communication" | "responsiveness" | "value" | "surveys" | "recommendations";
 
@@ -41,6 +43,11 @@ export default function Analytics() {
   const [isExporting, setIsExporting] = useState(false);
   const [showMetricSelector, setShowMetricSelector] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [showPreferenceMenu, setShowPreferenceMenu] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Load preferences from localStorage
   const metricPrefs = useMetricPreferences();
@@ -71,6 +78,48 @@ export default function Analytics() {
       defaultMinute: updates.minute !== undefined ? updates.minute : scheduleForm.minute,
       defaultDayOfMonth: updates.dayOfMonth || scheduleForm.dayOfMonth,
     });
+  };
+
+  // Export preferences handler
+  const handleExportPreferences = () => {
+    try {
+      const content = exportPreferences(
+        { selectedMetrics: selectedMetrics, lastUpdated: Date.now() },
+        {
+          defaultFrequency: scheduleForm.frequency as any,
+          defaultHour: scheduleForm.hour,
+          defaultMinute: scheduleForm.minute,
+          defaultDayOfMonth: scheduleForm.dayOfMonth,
+          lastUpdated: Date.now(),
+        }
+      );
+      const filename = generateExportFilename();
+      downloadPreferencesFile(content, filename);
+      setImportMessage({ type: 'success', text: 'Preferences exported successfully!' });
+      setTimeout(() => setImportMessage(null), 3000);
+    } catch (error) {
+      setImportMessage({ type: 'error', text: 'Failed to export preferences' });
+    }
+  };
+
+  const handleImportPreferences = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const result = parseImportedPreferences(content);
+        if (!result.success) {
+          setImportMessage({ type: 'error', text: result.error || 'Invalid preferences file' });
+          return;
+        }
+        setShowImportDialog(true);
+      } catch (error) {
+        setImportMessage({ type: 'error', text: 'Failed to read preferences file' });
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Fetch properties list for filtering
@@ -378,7 +427,29 @@ export default function Analytics() {
             </Card>
           )}
 
+          {importMessage && (
+            <div className={`p-3 rounded mb-4 text-sm ${importMessage.type === 'success' ? 'bg-green-900/30 text-green-400 border border-green-500/30' : 'bg-red-900/30 text-red-400 border border-red-500/30'}`}>
+              {importMessage.text}
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 mb-4">
+            <div className="relative">
+              <Button onClick={() => setShowPreferenceMenu(!showPreferenceMenu)} variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-900/30">
+                Preferences
+              </Button>
+              {showPreferenceMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-purple-900 border border-purple-500/30 rounded shadow-lg z-10">
+                  <button onClick={handleExportPreferences} className="w-full text-left px-4 py-2 text-white hover:bg-purple-800/50 border-b border-purple-500/20">
+                    Export Preferences
+                  </button>
+                  <button onClick={() => fileInputRef.current?.click()} className="w-full text-left px-4 py-2 text-white hover:bg-purple-800/50">
+                    Import Preferences
+                  </button>
+                  <input ref={fileInputRef} type="file" accept=".json" onChange={handleImportPreferences} className="hidden" />
+                </div>
+              )}
+            </div>
             <Button onClick={() => setShowMetricSelector(!showMetricSelector)} variant="outline" className="border-purple-500 text-purple-400 hover:bg-purple-900/30">
               {showMetricSelector ? "Hide Metrics" : "Select Metrics"}
             </Button>
