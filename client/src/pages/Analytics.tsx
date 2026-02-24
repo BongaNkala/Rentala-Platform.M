@@ -20,6 +20,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { trpc } from "@/lib/trpc";
+import { useMetricPreferences, useSchedulePreferences } from "@/hooks/useMetricPreferences";
 
 type ReportMetric = "overall" | "cleanliness" | "maintenance" | "communication" | "responsiveness" | "value" | "surveys" | "recommendations";
 
@@ -38,18 +39,39 @@ export default function Analytics() {
   const [months, setMonths] = useState(12);
   const [selectedPropertyId, setSelectedPropertyId] = useState<number | undefined>(undefined);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(["overall", "cleanliness", "maintenance", "communication", "responsiveness", "value", "surveys", "recommendations"]);
   const [showMetricSelector, setShowMetricSelector] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
+  
+  // Load preferences from localStorage
+  const metricPrefs = useMetricPreferences();
+  const schedulePrefs = useSchedulePreferences();
+  const [selectedMetrics, setSelectedMetrics] = useState<ReportMetric[]>(metricPrefs.selectedMetrics);
   const [scheduleForm, setScheduleForm] = useState({
     name: "",
     description: "",
-    frequency: "monthly" as const,
+    frequency: schedulePrefs.defaultFrequency,
     recipientEmails: "",
-    dayOfMonth: 1,
-    hour: 9,
-    minute: 0,
+    dayOfMonth: schedulePrefs.defaultDayOfMonth,
+    hour: schedulePrefs.defaultHour,
+    minute: schedulePrefs.defaultMinute,
   });
+
+  // Save metric preferences when they change
+  const handleMetricsChange = (metrics: ReportMetric[]) => {
+    setSelectedMetrics(metrics);
+    metricPrefs.updateMetrics(metrics);
+  };
+
+  // Save schedule preferences when form changes
+  const handleScheduleFormChange = (updates: Record<string, any>) => {
+    setScheduleForm({ ...scheduleForm, ...updates });
+    schedulePrefs.updateSchedulePreferences({
+      defaultFrequency: updates.frequency || scheduleForm.frequency,
+      defaultHour: updates.hour !== undefined ? updates.hour : scheduleForm.hour,
+      defaultMinute: updates.minute !== undefined ? updates.minute : scheduleForm.minute,
+      defaultDayOfMonth: updates.dayOfMonth || scheduleForm.dayOfMonth,
+    });
+  };
 
   // Fetch properties list for filtering
   const propertiesQuery = trpc.propertyAnalytics.getProperties.useQuery();
@@ -326,9 +348,9 @@ export default function Analytics() {
                       checked={selectedMetrics.includes(metric)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedMetrics([...selectedMetrics, metric]);
+                          handleMetricsChange([...selectedMetrics, metric]);
                         } else {
-                          setSelectedMetrics(selectedMetrics.filter((m) => m !== metric));
+                          handleMetricsChange(selectedMetrics.filter((m) => m !== metric));
                         }
                       }}
                       className="w-4 h-4"
@@ -338,13 +360,21 @@ export default function Analytics() {
                 ))}
               </div>
               <div className="flex gap-2 mt-4">
-                <Button size="sm" variant="outline" onClick={() => setSelectedMetrics(Object.keys(METRIC_LABELS) as ReportMetric[])}>
+                <Button size="sm" variant="outline" onClick={() => handleMetricsChange(Object.keys(METRIC_LABELS) as ReportMetric[])}>
                   Select All
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setSelectedMetrics([])}>
+                <Button size="sm" variant="outline" onClick={() => handleMetricsChange([])}>
                   Deselect All
                 </Button>
+                {!metricPrefs.isUsingDefaults && (
+                  <Button size="sm" variant="outline" className="text-orange-400 border-orange-500/30" onClick={() => metricPrefs.resetPreferences()}>
+                    Reset to Default
+                  </Button>
+                )}
               </div>
+              {!metricPrefs.isUsingDefaults && (
+                <p className="text-xs text-gray-400 mt-2">Using saved preferences</p>
+              )}
             </Card>
           )}
 
@@ -575,7 +605,7 @@ export default function Analytics() {
                   <input
                     type="text"
                     value={scheduleForm.name}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, name: e.target.value })}
+                    onChange={(e) => handleScheduleFormChange({ name: e.target.value })}
                     className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                     placeholder="e.g., Monthly Satisfaction Report"
                   />
@@ -584,7 +614,7 @@ export default function Analytics() {
                   <label className="block text-sm text-gray-300 mb-2">Frequency</label>
                   <select
                     value={scheduleForm.frequency}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, frequency: e.target.value as any })}
+                    onChange={(e) => handleScheduleFormChange({ frequency: e.target.value })}
                     className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                   >
                     <option value="weekly">Weekly</option>
@@ -600,7 +630,7 @@ export default function Analytics() {
                 <input
                   type="text"
                   value={scheduleForm.recipientEmails}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, recipientEmails: e.target.value })}
+                    onChange={(e) => handleScheduleFormChange({ recipientEmails: e.target.value })}
                   className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                   placeholder="email1@example.com, email2@example.com"
                 />
@@ -613,7 +643,7 @@ export default function Analytics() {
                     min="1"
                     max="31"
                     value={scheduleForm.dayOfMonth}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, dayOfMonth: parseInt(e.target.value) })}
+                    onChange={(e) => handleScheduleFormChange({ dayOfMonth: parseInt(e.target.value) })}
                     className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                   />
                 </div>
@@ -624,7 +654,7 @@ export default function Analytics() {
                     min="0"
                     max="23"
                     value={scheduleForm.hour}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, hour: parseInt(e.target.value) })}
+                    onChange={(e) => handleScheduleFormChange({ hour: parseInt(e.target.value) })}
                     className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                   />
                 </div>
@@ -635,7 +665,7 @@ export default function Analytics() {
                     min="0"
                     max="59"
                     value={scheduleForm.minute}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, minute: parseInt(e.target.value) })}
+                    onChange={(e) => handleScheduleFormChange({ minute: parseInt(e.target.value) })}
                     className="w-full bg-purple-900/50 border border-purple-500/30 rounded px-3 py-2 text-white"
                   />
                 </div>
