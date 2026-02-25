@@ -859,3 +859,59 @@ All functionality implemented and tested:
 - Version diff calculation for detecting metric, frequency, and time changes
 - 14 new unit tests for version service validation
 - All 133 tests passing with zero TypeScript errors
+
+
+## Phase 2 (Continued): Automatic Rollback on Report Failure
+
+### Database Schema
+- [ ] Create report_failures table to track delivery failures
+- [ ] Add columns for scheduleId, errorMessage, failureReason, timestamp
+- [ ] Create rollback_suggestions table for recommended versions
+- [ ] Add columns for userId, failureId, suggestedVersionId, reason
+- [ ] Add indexes for fast lookups
+
+### Failure Tracking Service
+- [ ] Create failure tracking service functions
+- [ ] Implement trackReportFailure function
+- [ ] Implement suggestRollback function
+- [ ] Implement getFailureHistory function
+- [ ] Add automatic suggestion logic on failure detection
+
+### tRPC Endpoints
+- [ ] Create endpoint to track report failures
+- [ ] Create endpoint to get failure history
+- [ ] Create endpoint to get rollback suggestions
+- [ ] Create endpoint to apply suggested rollback
+- [ ] Add authentication and validation
+
+### Frontend UI
+- [ ] Add failure alerts to Analytics dashboard
+- [ ] Display rollback suggestions with reason
+- [ ] Add one-click rollback button
+- [ ] Show failure history timeline
+- [ ] Add dismiss button for suggestions
+
+### Testing
+- [ ] Test failure tracking
+- [ ] Test rollback suggestion logic
+- [ ] Test one-click rollback application
+- [ ] Test failure history retrieval
+
+### Status
+- [ ] Automatic rollback on failure feature in progress
+
+## COMPLETED: Automatic Rollback on Report Failure
+
+All functionality implemented and tested:
+- Created report_failures table to track delivery failures with reason, error message, and count
+- Created rollback_suggestions table with confidence scores and status tracking
+- Implemented failure tracking service with auto-increment on consecutive failures
+- Implemented auto-suggest rollback logic that recommends previous stable version
+- Confidence calculation based on version history (60-90 range)
+- tRPC endpoints for trackFailure, getPendingSuggestions, getFailureHistory, applyRollback, dismissSuggestion, getFailureStats
+- Failure Alerts tab in Analytics dashboard with pending suggestions
+- Rollback suggestion cards with confidence scores and one-click apply button
+- Failure statistics cards showing total, unresolved, and most recent failures
+- Recent failure history list with failure reasons and error messages
+- 20 new unit tests for failure rollback functionality
+- All 153 tests passing with zero TypeScript errors

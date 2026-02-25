@@ -18,6 +18,7 @@ import { propertyAnalyticsRouter } from "./routers/propertyAnalytics";
 import { reportSchedulesRouter } from "./routers/reportSchedules";
 import { userPreferencesRouter } from "./routers/userPreferences";
 import { preferenceVersionsRouter } from "./routers/preferenceVersions";
+import { failureRollbackRouter } from "./routers/failureRollback";
 
 export const appRouter = router({
   // Core system routes
@@ -52,6 +53,7 @@ export const appRouter = router({
   reportSchedules: reportSchedulesRouter,
   userPreferences: userPreferencesRouter,
   preferenceVersions: preferenceVersionsRouter,
+  failureRollback: failureRollbackRouter,
 });
 
 export type AppRouter = typeof appRouter;

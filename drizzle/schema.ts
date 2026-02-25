@@ -506,3 +506,49 @@ export const preferenceVersions = mysqlTable("preference_versions", {
 
 export type PreferenceVersion = typeof preferenceVersions.$inferSelect;
 export type InsertPreferenceVersion = typeof preferenceVersions.$inferInsert;
+
+
+/**
+ * Report delivery failures tracking
+ */
+export const reportFailures = mysqlTable("report_failures", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduleId: int("scheduleId").notNull(),
+  userId: int("userId").notNull(),
+  propertyId: int("propertyId"),
+  failureReason: mysqlEnum("failureReason", ["email_delivery", "pdf_generation", "invalid_recipient", "network_error", "unknown"]).notNull(),
+  errorMessage: text("errorMessage"),
+  failureCount: int("failureCount").default(1), // Number of consecutive failures
+  lastFailedAt: timestamp("lastFailedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  resolvedAt: timestamp("resolvedAt"),
+}, (table) => ({
+  scheduleIdIdx: index("failure_schedule_idx").on(table.scheduleId),
+  userIdIdx: index("failure_user_idx").on(table.userId),
+  reasonIdx: index("failure_reason_idx").on(table.failureReason),
+  lastFailedIdx: index("failure_last_failed_idx").on(table.lastFailedAt),
+}));
+export type ReportFailure = typeof reportFailures.$inferSelect;
+export type InsertReportFailure = typeof reportFailures.$inferInsert;
+
+/**
+ * Automatic rollback suggestions for failed reports
+ */
+export const rollbackSuggestions = mysqlTable("rollback_suggestions", {
+  id: int("id").autoincrement().primaryKey(),
+  failureId: int("failureId").notNull(),
+  userId: int("userId").notNull(),
+  suggestedVersionId: int("suggestedVersionId").notNull(), // Reference to preference_versions
+  reason: text("reason").notNull(), // Why this version is suggested
+  confidence: int("confidence").notNull(), // 0-100 confidence score
+  status: mysqlEnum("status", ["pending", "accepted", "rejected", "applied"]).default("pending").notNull(),
+  appliedAt: timestamp("appliedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  failureIdIdx: index("suggestion_failure_idx").on(table.failureId),
+  userIdIdx: index("suggestion_user_idx").on(table.userId),
+  statusIdx: index("suggestion_status_idx").on(table.status),
+  versionIdIdx: index("suggestion_version_idx").on(table.suggestedVersionId),
+}));
+export type RollbackSuggestion = typeof rollbackSuggestions.$inferSelect;
+export type InsertRollbackSuggestion = typeof rollbackSuggestions.$inferInsert;

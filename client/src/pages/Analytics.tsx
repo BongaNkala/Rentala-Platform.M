@@ -57,6 +57,8 @@ export default function Analytics() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
   const [restoreMessage, setRestoreMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showFailureAlerts, setShowFailureAlerts] = useState(false);
+  const [rollbackMessage, setRollbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   // Server preference queries
   const serverPrefsQuery = trpc.userPreferences.get.useQuery();
@@ -66,6 +68,13 @@ export default function Analytics() {
   const versionsQuery = trpc.preferenceVersions.getVersions.useQuery();
   const restoreVersionMutation = trpc.preferenceVersions.restore.useMutation();
   const deleteVersionMutation = trpc.preferenceVersions.delete.useMutation();
+  
+  // Failure and rollback queries
+  const suggestionsQuery = trpc.failureRollback.getPendingSuggestions.useQuery();
+  const failureStatsQuery = trpc.failureRollback.getFailureStats.useQuery();
+  const failureHistoryQuery = trpc.failureRollback.getFailureHistory.useQuery({ limit: 10 });
+  const applyRollbackMutation = trpc.failureRollback.applyRollback.useMutation();
+  const dismissSuggestionMutation = trpc.failureRollback.dismissSuggestion.useMutation();
   const [scheduleForm, setScheduleForm] = useState({
     name: "",
     description: "",
@@ -247,6 +256,7 @@ export default function Analytics() {
           <TabsTrigger value="satisfaction">Tenant Satisfaction</TabsTrigger>
           <TabsTrigger value="schedules">Report Schedules</TabsTrigger>
           <TabsTrigger value="versions">Preference History</TabsTrigger>
+          <TabsTrigger value="failures">Failure Alerts</TabsTrigger>
         </TabsList>
 
         {/* Vacancy Trends Tab */}
@@ -951,6 +961,111 @@ export default function Analytics() {
               <Card className="bg-purple-900/30 border border-purple-500/30 p-6 text-center text-gray-400">
                 No preference versions yet. Your preferences will be saved as you make changes.
               </Card>
+            )}
+          </Card>
+        </TabsContent>
+
+        {/* Failure Alerts Tab */}
+        <TabsContent value="failures" className="space-y-4">
+          {rollbackMessage && (
+            <Card className={`p-4 ${rollbackMessage.type === 'success' ? 'bg-green-900/30 border-green-500/30' : 'bg-red-900/30 border-red-500/30'}`}>
+              <p className={rollbackMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+                {rollbackMessage.text}
+              </p>
+            </Card>
+          )}
+
+          {/* Pending Rollback Suggestions */}
+          {suggestionsQuery.data && suggestionsQuery.data.length > 0 && (
+            <Card className="bg-yellow-900/30 border border-yellow-500/30 p-6">
+              <h2 className="text-xl font-semibold text-yellow-300 mb-4">⚠️ Suggested Rollbacks</h2>
+              <div className="space-y-3">
+                {suggestionsQuery.data.map((suggestion) => (
+                  <div key={suggestion.id} className="bg-yellow-800/30 border border-yellow-500/20 p-4 rounded">
+                    <p className="text-white font-medium mb-2">Version {suggestion.suggestedVersionId}</p>
+                    <p className="text-sm text-gray-300 mb-3">{suggestion.reason}</p>
+                    <p className="text-xs text-gray-400 mb-3">Confidence: {suggestion.confidence}%</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={async () => {
+                          try {
+                            await applyRollbackMutation.mutateAsync({ suggestionId: suggestion.id });
+                            setRollbackMessage({ type: 'success', text: 'Preferences rolled back successfully' });
+                            suggestionsQuery.refetch();
+                            setTimeout(() => setRollbackMessage(null), 3000);
+                          } catch (error) {
+                            setRollbackMessage({ type: 'error', text: 'Failed to apply rollback' });
+                            setTimeout(() => setRollbackMessage(null), 3000);
+                          }
+                        }}
+                      >
+                        Apply Rollback
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-gray-400"
+                        onClick={async () => {
+                          try {
+                            await dismissSuggestionMutation.mutateAsync({ suggestionId: suggestion.id });
+                            suggestionsQuery.refetch();
+                          } catch (error) {
+                            console.error("Failed to dismiss suggestion", error);
+                          }
+                        }}
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Failure Statistics */}
+          {failureStatsQuery.data && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-red-900/30 border border-red-500/30 p-6">
+                <p className="text-gray-400 text-sm">Total Failures</p>
+                <p className="text-3xl font-bold text-red-400">{failureStatsQuery.data.totalFailures}</p>
+              </Card>
+              <Card className="bg-orange-900/30 border border-orange-500/30 p-6">
+                <p className="text-gray-400 text-sm">Unresolved Failures</p>
+                <p className="text-3xl font-bold text-orange-400">{failureStatsQuery.data.unresolvedFailures}</p>
+              </Card>
+              <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+                <p className="text-gray-400 text-sm">Most Recent</p>
+                <p className="text-sm text-purple-300">
+                  {failureStatsQuery.data.mostRecentFailure
+                    ? new Date(failureStatsQuery.data.mostRecentFailure).toLocaleDateString()
+                    : 'None'}
+                </p>
+              </Card>
+            </div>
+          )}
+
+          {/* Failure History */}
+          <Card className="bg-purple-900/30 border border-purple-500/30 p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Recent Failures</h2>
+            {failureHistoryQuery.isLoading ? (
+              <div className="text-gray-400">Loading failure history...</div>
+            ) : failureHistoryQuery.data && failureHistoryQuery.data.length > 0 ? (
+              <div className="space-y-2">
+                {failureHistoryQuery.data.map((failure) => (
+                  <div key={failure.id} className="bg-purple-800/30 border border-purple-500/20 p-3 rounded text-sm">
+                    <p className="text-white font-medium">{failure.failureReason}</p>
+                    <p className="text-xs text-gray-400 mt-1">Count: {failure.failureCount}</p>
+                    {failure.errorMessage && (
+                      <p className="text-xs text-red-400 mt-1">Error: {failure.errorMessage}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">No failures recorded</p>
             )}
           </Card>
         </TabsContent>
