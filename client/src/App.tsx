@@ -50,22 +50,24 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 /**
- * BackgroundImage Component - Universal Background
+ * BackgroundVideo Component - Universal 3D Video Background
  * 
- * Displays a static background image across all pages with:
+ * Displays an animated 3D background video across all pages with:
  * - Lazy loading for performance
- * - Responsive sizing (cover/contain)
+ * - Responsive video sizing (cover)
  * - Dark overlay for text readability
  * - Smooth fade-in animation
+ * - Fallback to gradient if video fails
  */
-function BackgroundImage() {
+function BackgroundVideo() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [sessionId] = useState(() => generateSessionId());
   const { user } = useAuth();
   const trackMutation = trpc.videoAnalytics.track.useMutation();
 
-  // Track background image load
+  // Track background video load
   useEffect(() => {
     (async () => {
       try {
@@ -73,7 +75,7 @@ function BackgroundImage() {
         trackMutation.mutate({
           sessionId,
           userId: user?.id || null,
-          format: 'image',
+          format: 'video',
           browserName: deviceInfo.browserName,
           browserVersion: deviceInfo.browserVersion,
           osName: deviceInfo.osName,
@@ -85,7 +87,7 @@ function BackgroundImage() {
           referrer: document.referrer,
         });
       } catch (error) {
-        console.error('Failed to track background image:', error);
+        console.error('Failed to track background video:', error);
       }
     })();
   }, [sessionId, user?.id, trackMutation]);
@@ -97,6 +99,12 @@ function BackgroundImage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsLoaded(true);
+            // Start playing video when visible
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {
+                console.warn('Video autoplay failed');
+              });
+            }
           }
         });
       },
@@ -120,18 +128,33 @@ function BackgroundImage() {
     <>
       <div
         ref={containerRef}
-        className="fixed inset-0 bg-background -z-10"
-        style={{
-          backgroundImage: isLoaded
-            ? 'url(https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/gcccXcqPpgLARqOY.png)'
-            : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 0.8s ease-in-out',
-        }}
-      />
+        className="fixed inset-0 bg-gradient-to-br from-blue-950 to-purple-950 -z-10 overflow-hidden"
+      >
+        {isLoaded && (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              opacity: 1,
+              transition: 'opacity 0.8s ease-in-out',
+            }}
+            onLoadedData={() => {
+              if (videoRef.current) {
+                videoRef.current.style.opacity = '1';
+              }
+            }}
+          >
+            <source
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/fzKpDTPHFVkmanzC.mp4"
+              type="video/mp4"
+            />
+          </video>
+        )}
+      </div>
       {/* Dark overlay for text readability */}
       <div className="fixed inset-0 bg-black/40 -z-10" style={{ opacity: isLoaded ? 1 : 0 }} />
     </>
@@ -143,7 +166,7 @@ export default function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <BackgroundImage />
+          <BackgroundVideo />
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
