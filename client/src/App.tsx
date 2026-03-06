@@ -23,6 +23,7 @@ import VideoAnalytics from "./pages/VideoAnalytics";
 import Analytics from "./pages/Analytics";
 import PropertiesManagement from "./pages/PropertiesManagement";
 import TenantsManagement from "./pages/TenantsManagement";
+import LeaseManagement from "./pages/LeaseManagement";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -185,6 +186,7 @@ export default function App() {
             <Route path="/analytics" component={() => <ProtectedRoute component={Analytics} />} />
             <Route path="/properties-management" component={() => <ProtectedRoute component={PropertiesManagement} />} />
             <Route path="/tenants-management" component={() => <ProtectedRoute component={TenantsManagement} />} />
+            <Route path="/leases-management" component={() => <ProtectedRoute component={LeaseManagement} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>
