@@ -21,6 +21,8 @@ import { trpc } from "./lib/trpc";
 import { getDeviceInfo, generateSessionId } from "./lib/deviceDetection";
 import VideoAnalytics from "./pages/VideoAnalytics";
 import Analytics from "./pages/Analytics";
+import PropertiesManagement from "./pages/PropertiesManagement";
+import TenantsManagement from "./pages/TenantsManagement";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -181,6 +183,8 @@ export default function App() {
             <Route path="/role-dashboard" component={() => <ProtectedRoute component={RoleAwareDashboard} />} />
             <Route path="/video-analytics" component={() => <ProtectedRoute component={VideoAnalytics} />} />
             <Route path="/analytics" component={() => <ProtectedRoute component={Analytics} />} />
+            <Route path="/properties-management" component={() => <ProtectedRoute component={PropertiesManagement} />} />
+            <Route path="/tenants-management" component={() => <ProtectedRoute component={TenantsManagement} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>

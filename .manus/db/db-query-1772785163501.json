@@ -1,0 +1,49 @@
+{
+  "query": "SELECT COUNT(*) as user_count FROM users; SELECT COUNT(*) as property_count FROM properties; SELECT COUNT(*) as unit_count FROM units; SELECT COUNT(*) as tenant_count FROM tenants; SELECT COUNT(*) as lease_count FROM leases; SELECT COUNT(*) as payment_count FROM payments; SELECT COUNT(*) as maintenance_count FROM maintenance_requests;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2XRX1iMDnTv6rbR.root --database XXbomGLTy2orzwdwCGpX97 --execute SELECT COUNT(*) as user_count FROM users; SELECT COUNT(*) as property_count FROM properties; SELECT COUNT(*) as unit_count FROM units; SELECT COUNT(*) as tenant_count FROM tenants; SELECT COUNT(*) as lease_count FROM leases; SELECT COUNT(*) as payment_count FROM payments; SELECT COUNT(*) as maintenance_count FROM maintenance_requests;",
+  "rows": [
+    {
+      "user_count": "2"
+    },
+    {
+      "user_count": "property_count"
+    },
+    {
+      "user_count": "4"
+    },
+    {
+      "user_count": "unit_count"
+    },
+    {
+      "user_count": "12"
+    },
+    {
+      "user_count": "tenant_count"
+    },
+    {
+      "user_count": "8"
+    },
+    {
+      "user_count": "lease_count"
+    },
+    {
+      "user_count": "8"
+    },
+    {
+      "user_count": "payment_count"
+    },
+    {
+      "user_count": "8"
+    },
+    {
+      "user_count": "maintenance_count"
+    },
+    {
+      "user_count": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "user_count\n2\nproperty_count\n4\nunit_count\n12\ntenant_count\n8\nlease_count\n8\npayment_count\n8\nmaintenance_count\n0\n",
+  "stderr": "",
+  "execution_time_ms": 93
+}
