@@ -14,7 +14,7 @@ interface PropertyWithStats {
   province?: string | null;
   propertyType: string;
   status: string;
-  totalUnits: number;
+  totalUnits: number | null;
   occupiedUnits?: number | null;
   monthlyRevenue?: number | null;
   description?: string | null;
@@ -74,7 +74,11 @@ export default function PropertiesManagement() {
   };
 
   const propertyTypes = ['residential', 'commercial', 'mixed'];
-  const occupancyRate = (occupied: number, total: number) => total > 0 ? Math.round((occupied / total) * 100) : 0;
+  const occupancyRate = (occupied: number | null | undefined, total: number | null | undefined) => {
+    const occ = occupied || 0;
+    const tot = total || 0;
+    return tot > 0 ? Math.round((occ / tot) * 100) : 0;
+  };
 
   return (
     <RentalaLayout pageTitle="Properties Management" pageSubtitle="Manage and monitor all your rental properties">

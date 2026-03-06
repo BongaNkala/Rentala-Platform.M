@@ -80,7 +80,7 @@ export default function TenantsManagement() {
         nationality: '',
         employmentStatus: 'employed',
         employer: '',
-        monthlyIncome: '',
+        monthlyIncome: 0,
       });
     },
   });
