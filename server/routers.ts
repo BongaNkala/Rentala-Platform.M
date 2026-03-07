@@ -1,5 +1,5 @@
-import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { COOKIE_NAME } from "../shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { propertiesRouter } from "./routers/properties";
@@ -19,6 +19,7 @@ import { reportSchedulesRouter } from "./routers/reportSchedules";
 import { userPreferencesRouter } from "./routers/userPreferences";
 import { preferenceVersionsRouter } from "./routers/preferenceVersions";
 import { failureRollbackRouter } from "./routers/failureRollback";
+import { tenantPaymentsRouter } from "./routers/tenantPayments";
 
 export const appRouter = router({
   // Core system routes
@@ -54,6 +55,9 @@ export const appRouter = router({
   userPreferences: userPreferencesRouter,
   preferenceVersions: preferenceVersionsRouter,
   failureRollback: failureRollbackRouter,
+  tenant: router({
+    payments: tenantPaymentsRouter,
+  }),
 });
 
 export type AppRouter = typeof appRouter;
