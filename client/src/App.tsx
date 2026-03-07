@@ -24,6 +24,12 @@ import Analytics from "./pages/Analytics";
 import PropertiesManagement from "./pages/PropertiesManagement";
 import TenantsManagement from "./pages/TenantsManagement";
 import LeaseManagement from "./pages/LeaseManagement";
+import PaymentTracking from "./pages/PaymentTracking";
+import LeaseRenewal from "./pages/LeaseRenewal";
+import DocumentManagement from "./pages/DocumentManagement";
+import MaintenanceWorkflow from "./pages/MaintenanceWorkflow";
+import TenantCommunication from "./pages/TenantCommunication";
+import AnalyticsReporting from "./pages/AnalyticsReporting";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -187,6 +193,12 @@ export default function App() {
             <Route path="/properties-management" component={() => <ProtectedRoute component={PropertiesManagement} />} />
             <Route path="/tenants-management" component={() => <ProtectedRoute component={TenantsManagement} />} />
             <Route path="/leases-management" component={() => <ProtectedRoute component={LeaseManagement} />} />
+            <Route path="/payment-tracking" component={() => <ProtectedRoute component={PaymentTracking} />} />
+            <Route path="/lease-renewal" component={() => <ProtectedRoute component={LeaseRenewal} />} />
+            <Route path="/documents" component={() => <ProtectedRoute component={DocumentManagement} />} />
+            <Route path="/maintenance-workflow" component={() => <ProtectedRoute component={MaintenanceWorkflow} />} />
+            <Route path="/tenant-communication" component={() => <ProtectedRoute component={TenantCommunication} />} />
+            <Route path="/analytics-reporting" component={() => <ProtectedRoute component={AnalyticsReporting} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>
