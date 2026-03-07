@@ -3,6 +3,7 @@ import { payments, leases, units, properties, tenants } from "../../drizzle/sche
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { getDb } from "../db";
+import { sendNotification } from "../services/notificationService";
 
 const createPaymentSchema = z.object({
   leaseId: z.number().int().positive(),

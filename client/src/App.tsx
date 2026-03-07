@@ -30,6 +30,7 @@ import DocumentManagement from "./pages/DocumentManagement";
 import MaintenanceWorkflow from "./pages/MaintenanceWorkflow";
 import TenantCommunication from "./pages/TenantCommunication";
 import AnalyticsReporting from "./pages/AnalyticsReporting";
+import NotificationPreferences from "./pages/NotificationPreferences";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -199,6 +200,7 @@ export default function App() {
             <Route path="/maintenance-workflow" component={() => <ProtectedRoute component={MaintenanceWorkflow} />} />
             <Route path="/tenant-communication" component={() => <ProtectedRoute component={TenantCommunication} />} />
             <Route path="/analytics-reporting" component={() => <ProtectedRoute component={AnalyticsReporting} />} />
+            <Route path="/notification-preferences" component={() => <ProtectedRoute component={NotificationPreferences} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>
