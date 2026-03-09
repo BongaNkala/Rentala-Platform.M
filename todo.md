@@ -314,9 +314,12 @@ For questions or issues, please refer to the GitHub repository or contact the de
 
 ### SMS Configuration
 - [x] Add Twilio credentials to environment variables
-- [ ] Implement SMS enable/disable toggle per user - Phase 3
-- [ ] Add phone number management UI - Phase 3
-- [ ] Create SMS notification preferences - Phase 3
+- [x] Implement SMS enable/disable toggle per user - Phase 3
+- [x] Add phone number management UI - Phase 3
+- [x] Create SMS notification preferences - Phase 3
+- [x] Build SMSPreferences page with phone verification
+- [x] Integrate SMS preferences into routing
+- [x] Add SMS notification tests (22 tests passing)
 
 
 ## Phase 3: Role-Based UI Customization
@@ -1038,3 +1041,13 @@ All functionality implemented and tested:
 - [x] Implement receipt downloads
 - [x] Add payment notifications
 - [x] Test payment flow
+
+
+## Phase 6: SMS Notification Integration
+- [ ] Set up SMS provider (Twilio/AWS SNS)
+- [ ] Create SMS notification service
+- [ ] Build rent reminder scheduler
+- [ ] Implement overdue alert system
+- [ ] Add SMS preferences UI
+- [ ] Test SMS delivery
+- [ ] Implement opt-out management

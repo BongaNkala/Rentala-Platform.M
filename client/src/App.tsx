@@ -32,6 +32,7 @@ import TenantCommunication from "./pages/TenantCommunication";
 import AnalyticsReporting from "./pages/AnalyticsReporting";
 import NotificationPreferences from "./pages/NotificationPreferences";
 import TenantPaymentPortal from "./pages/TenantPaymentPortal";
+import SMSPreferences from "./pages/SMSPreferences";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -203,6 +204,7 @@ export default function App() {
             <Route path="/analytics-reporting" component={() => <ProtectedRoute component={AnalyticsReporting} />} />
             <Route path="/notification-preferences" component={() => <ProtectedRoute component={NotificationPreferences} />} />
             <Route path="/tenant-payments" component={() => <ProtectedRoute component={TenantPaymentPortal} />} />
+            <Route path="/sms-preferences" component={() => <ProtectedRoute component={SMSPreferences} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>
