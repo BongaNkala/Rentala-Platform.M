@@ -85,8 +85,8 @@ function BackgroundImage() {
           }}
         />
       </div>
-      {/* Dark overlay for text readability */}
-      <div className="fixed inset-0 bg-black/30 -z-10" />
+      {/* Subtle overlay for text readability */}
+      <div className="fixed inset-0 bg-black/15 -z-10" />
     </>
   );
 }
