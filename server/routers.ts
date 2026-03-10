@@ -20,6 +20,7 @@ import { userPreferencesRouter } from "./routers/userPreferences";
 import { preferenceVersionsRouter } from "./routers/preferenceVersions";
 import { failureRollbackRouter } from "./routers/failureRollback";
 import { tenantPaymentsRouter } from "./routers/tenantPayments";
+import { smsCampaignsRouter } from "./routers/smsCampaigns";
 
 export const appRouter = router({
   // Core system routes
@@ -55,6 +56,7 @@ export const appRouter = router({
   userPreferences: userPreferencesRouter,
   preferenceVersions: preferenceVersionsRouter,
   failureRollback: failureRollbackRouter,
+  smsCampaigns: smsCampaignsRouter,
   tenant: router({
     payments: tenantPaymentsRouter,
   }),

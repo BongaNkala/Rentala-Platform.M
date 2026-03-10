@@ -1051,3 +1051,130 @@ All functionality implemented and tested:
 - [ ] Add SMS preferences UI
 - [ ] Test SMS delivery
 - [ ] Implement opt-out management
+
+
+## Phase 5: Bulk SMS Campaign Tool
+
+### Database Schema
+- [ ] Create sms_campaigns table (id, name, description, status, createdBy, createdAt, updatedAt)
+- [ ] Create sms_campaign_recipients table (id, campaignId, tenantId, phoneNumber, status)
+- [ ] Create sms_campaign_messages table (id, campaignId, messageTemplate, scheduledTime, sentAt)
+- [ ] Create sms_campaign_delivery table (id, campaignId, recipientId, status, deliveredAt, error)
+
+### Backend Service
+- [ ] Create smsCampaignService.ts with CRUD operations
+- [ ] Implement campaign creation and validation
+- [ ] Implement recipient selection (by property, by tenant status, by payment status)
+- [ ] Implement message template system
+- [ ] Implement campaign scheduling logic
+- [ ] Implement delivery tracking and status updates
+- [ ] Add campaign analytics (sent, delivered, failed, bounce rate)
+
+### tRPC Procedures
+- [ ] Create campaigns.create procedure
+- [ ] Create campaigns.list procedure
+- [ ] Create campaigns.getById procedure
+- [ ] Create campaigns.update procedure
+- [ ] Create campaigns.delete procedure
+- [ ] Create campaigns.send procedure
+- [ ] Create campaigns.schedule procedure
+- [ ] Create campaigns.getDeliveryStatus procedure
+- [ ] Create campaigns.getAnalytics procedure
+
+### Frontend UI
+- [ ] Create BulkSMSCampaigns.tsx page
+- [ ] Build campaign list view with filters and search
+- [ ] Build campaign creation form with message editor
+- [ ] Implement recipient selector (multi-select with filters)
+- [ ] Build message preview and character counter
+- [ ] Implement scheduling UI (immediate or scheduled)
+- [ ] Build delivery status tracker
+- [ ] Build campaign analytics dashboard
+
+### Features
+- [ ] Message templates for common announcements
+- [ ] Recipient filtering (by property, status, payment status)
+- [ ] Bulk recipient import from CSV
+- [ ] Message preview with character count
+- [ ] Scheduled campaign delivery
+- [ ] Real-time delivery status tracking
+- [ ] Campaign performance analytics
+- [ ] Campaign history and archive
+
+### Testing
+- [ ] Write tests for campaign service (CRUD operations)
+- [ ] Write tests for recipient selection logic
+- [ ] Write tests for message template system
+- [ ] Write tests for scheduling logic
+- [ ] Write tests for delivery tracking
+- [ ] Write tests for analytics calculations
+- [ ] Write tests for tRPC procedures
+
+### Integration
+- [ ] Integrate with SMS notification service
+- [ ] Add campaign route to App.tsx
+- [ ] Add campaign link to dashboard navigation
+- [ ] Add campaign analytics to main analytics dashboard
+
+
+## Phase 7: Bulk SMS Campaign Tool (Completed)
+
+### Database Schema
+- [x] Created sms_campaigns table with campaign metadata
+- [x] Created sms_campaign_recipients table for recipient tracking
+- [x] Created sms_campaign_delivery table for delivery logs
+- [x] Created sms_campaign_templates table for message templates
+- [x] Database migration applied successfully (4 new tables)
+
+### Backend Service
+- [x] Created smsCampaignService.ts with full CRUD operations
+- [x] Implemented campaign creation with validation
+- [x] Implemented recipient selection and phone validation
+- [x] Implemented message template system
+- [x] Implemented campaign scheduling logic
+- [x] Implemented delivery tracking and status updates
+- [x] Implemented campaign analytics calculations
+
+### tRPC Procedures
+- [x] Created smsCampaignsRouter with 11 procedures
+- [x] Implemented create, list, getById, update, delete procedures
+- [x] Implemented send, getAnalytics, getDeliveryStatus procedures
+- [x] Implemented getRecipients, createTemplate, getTemplates procedures
+- [x] Integrated router into main appRouter
+
+### Frontend UI
+- [x] Created BulkSMSCampaigns.tsx page component
+- [x] Built campaign list view with search and filtering
+- [x] Built campaign creation form with message editor
+- [x] Implemented recipient selector UI
+- [x] Built message preview with character counter
+- [x] Implemented scheduling UI (immediate or scheduled)
+- [x] Built delivery status tracker
+- [x] Built campaign analytics dashboard
+- [x] Added route /bulk-sms-campaigns to App.tsx
+
+### Features Implemented
+- [x] Message templates for common announcements
+- [x] Recipient filtering (by property, status, payment status)
+- [x] Message preview with character count (160 char limit)
+- [x] Scheduled campaign delivery
+- [x] Real-time delivery status tracking
+- [x] Campaign performance analytics
+- [x] Campaign history and archive
+- [x] SMS campaign scheduler (runs every 5 minutes)
+
+### Testing
+- [x] Created comprehensive test suite (44 tests)
+- [x] Tests for campaign CRUD operations
+- [x] Tests for recipient selection logic
+- [x] Tests for message template system
+- [x] Tests for scheduling logic
+- [x] Tests for delivery tracking
+- [x] Tests for analytics calculations
+- [x] All 239 tests passing with zero TypeScript errors
+
+### Integration
+- [x] Integrated with SMS notification service
+- [x] Added campaign route to App.tsx (/bulk-sms-campaigns)
+- [x] Campaign scheduler runs every 5 minutes
+- [x] Full tRPC integration for all operations

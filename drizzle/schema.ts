@@ -552,3 +552,103 @@ export const rollbackSuggestions = mysqlTable("rollback_suggestions", {
 }));
 export type RollbackSuggestion = typeof rollbackSuggestions.$inferSelect;
 export type InsertRollbackSuggestion = typeof rollbackSuggestions.$inferInsert;
+
+
+/**
+ * SMS Campaigns for bulk messaging to tenants
+ * Allows landlords to send custom announcements to multiple tenants
+ */
+export const smsCampaigns = mysqlTable("sms_campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // Landlord who created the campaign
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  messageTemplate: text("messageTemplate").notNull(),
+  status: mysqlEnum("status", ["draft", "scheduled", "sent", "cancelled"]).default("draft").notNull(),
+  recipientCount: int("recipientCount").default(0),
+  sentCount: int("sentCount").default(0),
+  deliveredCount: int("deliveredCount").default(0),
+  failedCount: int("failedCount").default(0),
+  scheduledTime: timestamp("scheduledTime"),
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("campaign_user_idx").on(table.userId),
+  statusIdx: index("campaign_status_idx").on(table.status),
+  scheduledIdx: index("campaign_scheduled_idx").on(table.scheduledTime),
+}));
+
+export type SmsCampaign = typeof smsCampaigns.$inferSelect;
+export type InsertSmsCampaign = typeof smsCampaigns.$inferInsert;
+
+/**
+ * SMS Campaign Recipients
+ * Tracks which tenants are targeted by each campaign
+ */
+export const smsCampaignRecipients = mysqlTable("sms_campaign_recipients", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  tenantId: int("tenantId").notNull(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
+  status: mysqlEnum("status", ["pending", "sent", "delivered", "failed", "bounced"]).default("pending").notNull(),
+  sentAt: timestamp("sentAt"),
+  deliveredAt: timestamp("deliveredAt"),
+  failureReason: text("failureReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  campaignIdIdx: index("recipient_campaign_idx").on(table.campaignId),
+  tenantIdIdx: index("recipient_tenant_idx").on(table.tenantId),
+  statusIdx: index("recipient_status_idx").on(table.status),
+}));
+
+export type SmsCampaignRecipient = typeof smsCampaignRecipients.$inferSelect;
+export type InsertSmsCampaignRecipient = typeof smsCampaignRecipients.$inferInsert;
+
+/**
+ * SMS Campaign Delivery Log
+ * Tracks delivery attempts and results for analytics
+ */
+export const smsCampaignDelivery = mysqlTable("sms_campaign_delivery", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  recipientId: int("recipientId").notNull(),
+  messageId: varchar("messageId", { length: 255 }), // External SMS provider message ID
+  status: mysqlEnum("status", ["queued", "sent", "delivered", "failed", "bounced"]).default("queued").notNull(),
+  errorCode: varchar("errorCode", { length: 50 }),
+  errorMessage: text("errorMessage"),
+  sentAt: timestamp("sentAt"),
+  deliveredAt: timestamp("deliveredAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  campaignIdIdx: index("delivery_campaign_idx").on(table.campaignId),
+  recipientIdIdx: index("delivery_recipient_idx").on(table.recipientId),
+  statusIdx: index("delivery_status_idx").on(table.status),
+  sentAtIdx: index("delivery_sent_idx").on(table.sentAt),
+}));
+
+export type SmsCampaignDelivery = typeof smsCampaignDelivery.$inferSelect;
+export type InsertSmsCampaignDelivery = typeof smsCampaignDelivery.$inferInsert;
+
+/**
+ * SMS Campaign Templates
+ * Pre-built message templates for common announcements
+ */
+export const smsCampaignTemplates = mysqlTable("sms_campaign_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  messageTemplate: text("messageTemplate").notNull(),
+  category: mysqlEnum("category", ["maintenance", "payment", "announcement", "emergency", "other"]).default("other").notNull(),
+  variables: text("variables"), // JSON array of variable names (e.g., ["tenantName", "propertyName"])
+  isPublic: boolean("isPublic").default(false), // Available to all users or just creator
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("template_user_idx").on(table.userId),
+  categoryIdx: index("template_category_idx").on(table.category),
+}));
+
+export type SmsCampaignTemplate = typeof smsCampaignTemplates.$inferSelect;
+export type InsertSmsCampaignTemplate = typeof smsCampaignTemplates.$inferInsert;
