@@ -14,7 +14,9 @@ import {
   BarChart3,
   Search,
   Filter,
+  X,
 } from 'lucide-react';
+import './BulkSMSCampaigns.css';
 
 interface Campaign {
   id: number;
@@ -33,7 +35,6 @@ interface Campaign {
 }
 
 export default function BulkSMSCampaigns() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -138,15 +139,15 @@ export default function BulkSMSCampaigns() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft':
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+        return 'status-draft';
       case 'scheduled':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
+        return 'status-scheduled';
       case 'sent':
-        return 'bg-green-500/20 text-green-400 border-green-500/50';
+        return 'status-sent';
       case 'cancelled':
-        return 'bg-red-500/20 text-red-400 border-red-500/50';
+        return 'status-cancelled';
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+        return 'status-draft';
     }
   };
 
@@ -166,303 +167,291 @@ export default function BulkSMSCampaigns() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-              <MessageSquare size={40} className="text-blue-400" />
-              Bulk SMS Campaigns
-            </h1>
-            <p className="text-gray-400">Send custom announcements to multiple tenants at once</p>
-          </div>
-          <Button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex items-center gap-2"
-          >
-            <Plus size={20} />
-            New Campaign
-          </Button>
+    <div className="sms-campaigns-container">
+      {/* Header */}
+      <div className="campaigns-header">
+        <div className="header-content">
+          <h1 className="page-title">
+            <MessageSquare className="title-icon" />
+            Bulk SMS Campaigns
+          </h1>
+          <p className="page-subtitle">Send custom announcements to multiple tenants at once</p>
         </div>
+        <Button
+          onClick={() => setShowCreateForm(true)}
+          className="btn-create-campaign"
+        >
+          <Plus size={20} />
+          New Campaign
+        </Button>
+      </div>
 
-        {/* Create Form Modal */}
-        {showCreateForm && (
-          <Card className="bg-white/5 border-white/10 p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Create New Campaign</h2>
+      {/* Create Form Modal */}
+      {showCreateForm && (
+        <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
+          <div className="glass-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New Campaign</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowCreateForm(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
 
-            <div className="space-y-6">
+            <div className="modal-body">
               {/* Campaign Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Campaign Name *
-                </label>
+              <div className="form-group">
+                <label className="form-label">Campaign Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Maintenance Notice"
-                  className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 />
               </div>
 
               {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Description
-                </label>
+              <div className="form-group">
+                <label className="form-label">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Optional description for internal reference"
                   rows={2}
-                  className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="form-textarea"
                 />
               </div>
 
               {/* Message Template */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Message *
-                </label>
+              <div className="form-group">
+                <label className="form-label">Message *</label>
                 <textarea
                   value={formData.messageTemplate}
                   onChange={(e) => setFormData({ ...formData, messageTemplate: e.target.value })}
                   placeholder="Enter your SMS message (max 160 characters)"
                   maxLength={160}
                   rows={4}
-                  className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="form-textarea"
                 />
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="char-count">
                   {formData.messageTemplate.length}/160 characters
                 </p>
               </div>
 
               {/* Recipients */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
+              <div className="form-group">
+                <label className="form-label">
                   Recipients * ({selectedTenants.length} selected)
                 </label>
-                <Button
+                <button
                   onClick={() => setShowRecipientSelector(!showRecipientSelector)}
-                  className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                  className="btn-secondary"
                 >
                   {showRecipientSelector ? 'Hide Recipient Selector' : 'Select Recipients'}
-                </Button>
+                </button>
 
                 {showRecipientSelector && (
-                  <div className="mt-4 p-4 bg-white/5 border border-white/10 rounded-lg">
-                    <p className="text-gray-400 text-sm mb-4">
+                  <div className="recipient-selector">
+                    <p className="selector-hint">
                       Select tenants to receive this campaign. You can filter by property or tenant
                       status.
                     </p>
-                    {/* In a real app, this would show a multi-select list of tenants */}
-                    <div className="space-y-2">
-                      <p className="text-gray-500 text-sm italic">
-                        Tenant selector would appear here with filtering options
-                      </p>
-                    </div>
                   </div>
                 )}
               </div>
 
               {/* Scheduling */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Schedule (Optional)
-                </label>
+              <div className="form-group">
+                <label className="form-label">Schedule (Optional)</label>
                 <input
                   type="datetime-local"
                   value={formData.scheduledTime}
                   onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 />
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="form-hint">
                   Leave empty to send immediately, or select a date/time to schedule
                 </p>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 pt-4">
-                <Button
+              <div className="modal-actions">
+                <button
                   onClick={handleCreateCampaign}
                   disabled={createMutation.isPending}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                  className="btn-primary"
                 >
                   {createMutation.isPending ? 'Creating...' : 'Create Campaign'}
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => setShowCreateForm(false)}
-                  className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                  className="btn-secondary"
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             </div>
-          </Card>
-        )}
-
-        {/* Search and Filter */}
-        <div className="mb-6 flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-500" size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search campaigns..."
-              className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-            />
           </div>
+        </div>
+      )}
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="sent">Sent</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+      {/* Search and Filter */}
+      <div className="campaigns-filters">
+        <div className="search-box">
+          <Search size={20} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search campaigns..."
+            className="search-input"
+          />
         </div>
 
-        {/* Campaign Details Modal */}
-        {showDetails && selectedCampaign && analytics && (
-          <Card className="bg-white/5 border-white/10 p-8 mb-8">
-            <div className="flex justify-between items-start mb-6">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="filter-select"
+        >
+          <option value="all">All Status</option>
+          <option value="draft">Draft</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="sent">Sent</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Campaign Details Modal */}
+      {showDetails && selectedCampaign && analytics && (
+        <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+          <div className="glass-modal modal-details" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
               <div>
-                <h2 className="text-2xl font-bold text-white">{selectedCampaign.name}</h2>
-                <p className="text-gray-400 mt-2">{selectedCampaign.description}</p>
+                <h2>{selectedCampaign.name}</h2>
+                <p className="modal-subtitle">{selectedCampaign.description}</p>
               </div>
-              <Button
+              <button
+                className="modal-close"
                 onClick={() => setShowDetails(false)}
-                className="bg-white/10 hover:bg-white/20 text-white"
               >
-                Close
-              </Button>
+                <X size={24} />
+              </button>
             </div>
 
             {/* Analytics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-white/5 border-white/10 p-4">
-                <p className="text-gray-400 text-sm">Total Recipients</p>
-                <p className="text-2xl font-bold text-white mt-2">{analytics.totalRecipients}</p>
-              </Card>
-              <Card className="bg-white/5 border-white/10 p-4">
-                <p className="text-gray-400 text-sm">Sent</p>
-                <p className="text-2xl font-bold text-blue-400 mt-2">{analytics.sent}</p>
-              </Card>
-              <Card className="bg-white/5 border-white/10 p-4">
-                <p className="text-gray-400 text-sm">Delivered</p>
-                <p className="text-2xl font-bold text-green-400 mt-2">{analytics.delivered}</p>
-              </Card>
-              <Card className="bg-white/5 border-white/10 p-4">
-                <p className="text-gray-400 text-sm">Failed</p>
-                <p className="text-2xl font-bold text-red-400 mt-2">{analytics.failed}</p>
-              </Card>
+            <div className="analytics-grid">
+              <div className="analytics-card">
+                <p className="analytics-label">Total Recipients</p>
+                <p className="analytics-value">{analytics.totalRecipients}</p>
+              </div>
+              <div className="analytics-card">
+                <p className="analytics-label">Sent</p>
+                <p className="analytics-value sent">{analytics.sent}</p>
+              </div>
+              <div className="analytics-card">
+                <p className="analytics-label">Delivered</p>
+                <p className="analytics-value delivered">{analytics.delivered}</p>
+              </div>
+              <div className="analytics-card">
+                <p className="analytics-label">Failed</p>
+                <p className="analytics-value failed">{analytics.failed}</p>
+              </div>
             </div>
 
             {/* Message Preview */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-8">
-              <p className="text-gray-400 text-sm mb-2">Message Preview</p>
-              <p className="text-white text-lg">{selectedCampaign.messageTemplate}</p>
+            <div className="message-preview">
+              <p className="preview-label">Message Preview</p>
+              <p className="preview-text">{selectedCampaign.messageTemplate}</p>
             </div>
-          </Card>
-        )}
-
-        {/* Campaigns List */}
-        <div className="space-y-4">
-          {filteredCampaigns.length === 0 ? (
-            <Card className="bg-white/5 border-white/10 p-8 text-center">
-              <MessageSquare size={48} className="mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">No campaigns found</p>
-            </Card>
-          ) : (
-            filteredCampaigns.map((campaign) => (
-              <Card
-                key={campaign.id}
-                className="bg-white/5 border-white/10 p-6 hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white">{campaign.name}</h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${getStatusColor(
-                          campaign.status
-                        )}`}
-                      >
-                        {getStatusIcon(campaign.status)}
-                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                      </span>
-                    </div>
-
-                    <p className="text-gray-400 text-sm mb-3">{campaign.description}</p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <p className="text-gray-500 text-xs">Recipients</p>
-                        <p className="text-white font-semibold">{campaign.recipientCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs">Sent</p>
-                        <p className="text-blue-400 font-semibold">{campaign.sentCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs">Delivered</p>
-                        <p className="text-green-400 font-semibold">{campaign.deliveredCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs">Failed</p>
-                        <p className="text-red-400 font-semibold">{campaign.failedCount}</p>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-500 text-xs">
-                      Created: {new Date(campaign.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      onClick={() => {
-                        setSelectedCampaign(campaign);
-                        setShowDetails(true);
-                      }}
-                      className="bg-white/10 hover:bg-white/20 text-white p-2"
-                      title="View Details"
-                    >
-                      <Eye size={18} />
-                    </Button>
-
-                    {campaign.status === 'draft' && (
-                      <Button
-                        onClick={() => handleSendCampaign(campaign.id)}
-                        disabled={sendMutation.isPending}
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-2"
-                        title="Send Campaign"
-                      >
-                        <Send size={18} />
-                      </Button>
-                    )}
-
-                    <Button
-                      onClick={() => handleDeleteCampaign(campaign.id)}
-                      disabled={deleteMutation.isPending}
-                      className="bg-red-600 hover:bg-red-700 text-white p-2"
-                      title="Delete Campaign"
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))
-          )}
+          </div>
         </div>
+      )}
+
+      {/* Campaigns List */}
+      <div className="campaigns-list">
+        {filteredCampaigns.length === 0 ? (
+          <div className="empty-state">
+            <MessageSquare size={48} />
+            <p>No campaigns found</p>
+          </div>
+        ) : (
+          filteredCampaigns.map((campaign) => (
+            <div key={campaign.id} className="campaign-card glass-panel">
+              <div className="campaign-header">
+                <div className="campaign-title-section">
+                  <h3 className="campaign-name">{campaign.name}</h3>
+                  <span className={`status-badge ${getStatusColor(campaign.status)}`}>
+                    {getStatusIcon(campaign.status)}
+                    <span>{campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}</span>
+                  </span>
+                </div>
+
+                <div className="campaign-actions">
+                  <button
+                    onClick={() => {
+                      setSelectedCampaign(campaign);
+                      setShowDetails(true);
+                    }}
+                    className="action-btn action-view"
+                    title="View Details"
+                  >
+                    <Eye size={18} />
+                  </button>
+
+                  {campaign.status === 'draft' && (
+                    <button
+                      onClick={() => handleSendCampaign(campaign.id)}
+                      disabled={sendMutation.isPending}
+                      className="action-btn action-send"
+                      title="Send Campaign"
+                    >
+                      <Send size={18} />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleDeleteCampaign(campaign.id)}
+                    disabled={deleteMutation.isPending}
+                    className="action-btn action-delete"
+                    title="Delete Campaign"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {campaign.description && (
+                <p className="campaign-description">{campaign.description}</p>
+              )}
+
+              <div className="campaign-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Recipients</span>
+                  <span className="stat-value">{campaign.recipientCount || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Sent</span>
+                  <span className="stat-value sent">{campaign.sentCount || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Delivered</span>
+                  <span className="stat-value delivered">{campaign.deliveredCount || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Failed</span>
+                  <span className="stat-value failed">{campaign.failedCount || 0}</span>
+                </div>
+              </div>
+
+              <p className="campaign-date">
+                Created: {new Date(campaign.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,768 @@
+/* Rentala Bulk SMS Campaigns - Premium Glassmorphism Design */
+
+:root {
+  --primary: #4361ee;
+  --primary-dark: #3a56d4;
+  --primary-light: #4895ef;
+  --secondary: #7209b7;
+  --accent: #4cc9f0;
+  --success: #4ade80;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --dark: #1f2937;
+  --light: rgba(255, 255, 255, 0.95);
+  --glass: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --blur-amount: 30px;
+}
+
+.sms-campaigns-container {
+  padding: 35px 40px;
+  min-height: 100vh;
+}
+
+/* Header */
+.campaigns-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 35px;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.title-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+  filter: drop-shadow(0 4px 15px rgba(76, 201, 240, 0.3));
+}
+
+.page-subtitle {
+  margin: 10px 0 0 0;
+  opacity: 0.9;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.btn-create-campaign {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition);
+  box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.btn-create-campaign:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(67, 97, 238, 0.6);
+}
+
+.btn-create-campaign:active {
+  transform: translateY(0);
+}
+
+/* Filters */
+.campaigns-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  color: white;
+  transition: var(--transition);
+}
+
+.search-box:focus-within {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.search-box svg {
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  font-weight: 500;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-select {
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  min-width: 160px;
+}
+
+.filter-select:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.filter-select option {
+  background: rgba(31, 41, 55, 0.95);
+  color: white;
+  padding: 10px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.glass-modal {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 8px 0 0 0;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  color: white;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.modal-body {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.2px;
+}
+
+.form-input,
+.form-textarea {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.char-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.recipient-selector {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.selector-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-style: italic;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.btn-primary {
+  flex: 1;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(67, 97, 238, 0.5);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Analytics Grid */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.analytics-card {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.analytics-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.analytics-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.analytics-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.analytics-value.sent {
+  color: var(--primary-light);
+}
+
+.analytics-value.delivered {
+  color: var(--success);
+}
+
+.analytics-value.failed {
+  color: var(--danger);
+}
+
+/* Message Preview */
+.message-preview {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.preview-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.preview-text {
+  font-size: 15px;
+  color: white;
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Campaigns List */
+.campaigns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  gap: 16px;
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* Campaign Card */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-amount));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: var(--transition);
+}
+
+.campaign-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campaign-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.campaign-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.campaign-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.campaign-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  border: 1px solid transparent;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.status-draft {
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(107, 114, 128, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.status-scheduled {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--info);
+}
+
+.status-sent {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: var(--success);
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+}
+
+.campaign-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-view:hover {
+  color: var(--accent);
+}
+
+.action-send:hover {
+  color: var(--success);
+}
+
+.action-delete:hover {
+  color: var(--danger);
+}
+
+.campaign-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.campaign-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stat-value.sent {
+  color: var(--primary-light);
+}
+
+.stat-value.delivered {
+  color: var(--success);
+}
+
+.stat-value.failed {
+  color: var(--danger);
+}
+
+.campaign-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.modal-details {
+  max-width: 700px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sms-campaigns-container {
+    padding: 20px;
+  }
+
+  .campaigns-header {
+    flex-direction: column;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .campaigns-filters {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: auto;
+  }
+
+  .filter-select {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .campaign-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .campaign-header {
+    flex-direction: column;
+  }
+
+  .campaign-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sms-campaigns-container {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    gap: 8px;
+  }
+
+  .title-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-create-campaign {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .campaign-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .glass-modal {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+}
