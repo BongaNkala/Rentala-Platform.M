@@ -119,6 +119,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: url('https://d2xsxph8kpxj0f.cloudfront.net/310519663152451982/XXbomGLTy2orzwdwCGpX97/rentala_web_background_balanced_21fb893d.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

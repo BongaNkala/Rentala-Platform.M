@@ -63,113 +63,30 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 /**
- * BackgroundVideo Component - Universal 3D Video Background
+ * BackgroundImage Component - Universal Rentala Background
  * 
- * Displays an animated 3D background video across all pages with:
- * - Lazy loading for performance
- * - Responsive video sizing (cover)
+ * Displays the Rentala background image across all pages with:
+ * - Fixed positioning for consistent appearance
+ * - Responsive sizing (cover)
  * - Dark overlay for text readability
- * - Smooth fade-in animation
- * - Fallback to gradient if video fails
+ * - Optimized performance
  */
-function BackgroundVideo() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [sessionId] = useState(() => generateSessionId());
-  const { user } = useAuth();
-  const trackMutation = trpc.videoAnalytics.track.useMutation();
-
-  // Track background video load
-  useEffect(() => {
-    (async () => {
-      try {
-        const deviceInfo = await getDeviceInfo();
-        trackMutation.mutate({
-          sessionId,
-          userId: user?.id || null,
-          format: 'video',
-          browserName: deviceInfo.browserName,
-          browserVersion: deviceInfo.browserVersion,
-          osName: deviceInfo.osName,
-          osVersion: deviceInfo.osVersion,
-          deviceType: deviceInfo.deviceType,
-          screenResolution: deviceInfo.screenResolution,
-          connectionSpeed: deviceInfo.connectionSpeed,
-          pageUrl: window.location.href,
-          referrer: document.referrer,
-        });
-      } catch (error) {
-        console.error('Failed to track background video:', error);
-      }
-    })();
-  }, [sessionId, user?.id, trackMutation]);
-
-  // Lazy loading with Intersection Observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsLoaded(true);
-            // Start playing video when visible
-            if (videoRef.current) {
-              videoRef.current.play().catch(() => {
-                console.warn('Video autoplay failed');
-              });
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, []);
-
+function BackgroundImage() {
   return (
     <>
-      <div
-        ref={containerRef}
-        className="fixed inset-0 bg-gradient-to-br from-blue-950 to-purple-950 -z-10 overflow-hidden"
-      >
-        {isLoaded && (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              opacity: 1,
-              transition: 'opacity 0.8s ease-in-out',
-            }}
-            onLoadedData={() => {
-              if (videoRef.current) {
-                videoRef.current.style.opacity = '1';
-              }
-            }}
-          >
-            <source
-              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663152451982/fzKpDTPHFVkmanzC.mp4"
-              type="video/mp4"
-            />
-          </video>
-        )}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <img
+          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663152451982/XXbomGLTy2orzwdwCGpX97/rentala_web_background_balanced_21fb893d.png"
+          alt="Rentala Background"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            opacity: 1,
+            transition: 'opacity 0.8s ease-in-out',
+          }}
+        />
       </div>
       {/* Dark overlay for text readability */}
-      <div className="fixed inset-0 bg-black/40 -z-10" style={{ opacity: isLoaded ? 1 : 0 }} />
+      <div className="fixed inset-0 bg-black/30 -z-10" />
     </>
   );
 }
@@ -179,7 +96,7 @@ export default function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <BackgroundVideo />
+          <BackgroundImage />
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
