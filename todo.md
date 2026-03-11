@@ -1178,3 +1178,77 @@ All functionality implemented and tested:
 - [x] Added campaign route to App.tsx (/bulk-sms-campaigns)
 - [x] Campaign scheduler runs every 5 minutes
 - [x] Full tRPC integration for all operations
+
+
+## Phase 8: SMS Announcement Templates (In Progress)
+
+### Database Schema
+- [ ] Create sms_templates table with template metadata
+- [ ] Create sms_template_categories table for template organization
+- [ ] Add template_id foreign key to sms_campaigns table
+- [ ] Database migration for new tables
+
+### Backend Service
+- [ ] Create smsTemplateService.ts with CRUD operations
+- [ ] Implement template creation with validation
+- [ ] Implement template categorization
+- [ ] Implement template search and filtering
+- [ ] Implement template usage tracking
+- [ ] Implement template duplication
+- [ ] Implement template deletion with cascade
+
+### tRPC Procedures
+- [ ] Create smsTemplatesRouter with procedures
+- [ ] Implement create, list, getById, update, delete procedures
+- [ ] Implement getByCategory, search, duplicate procedures
+- [ ] Implement getUsageStats procedure
+- [ ] Integrate router into main appRouter
+
+### Frontend UI
+- [ ] Create SMSTemplates.tsx page component
+- [ ] Build template list view with search and filtering
+- [ ] Build template creation form with editor
+- [ ] Build template category selector
+- [ ] Build template preview with character counter
+- [ ] Build template editor modal
+- [ ] Build template deletion confirmation
+- [ ] Build template usage statistics view
+- [ ] Add route /sms-templates to App.tsx
+
+### Features
+- [ ] Save announcement messages as templates
+- [ ] Organize templates by category (maintenance, rent, lease, etc.)
+- [ ] Search templates by name or content
+- [ ] Quick template duplication
+- [ ] Template usage tracking (how many campaigns used each)
+- [ ] Template edit history
+- [ ] Bulk template import/export
+
+### Integration
+- [ ] Integrate templates with bulk SMS campaigns
+- [ ] Add template selector to campaign creation form
+- [ ] Auto-populate message field from selected template
+- [ ] Show template usage in template list
+- [ ] Add template management link to dashboard
+
+### Testing
+- [ ] Write tests for template CRUD operations
+- [ ] Write tests for template categorization
+- [ ] Write tests for template search and filtering
+- [ ] Write tests for template usage tracking
+- [ ] Write tests for tRPC procedures
+- [ ] Ensure all tests passing
+
+
+## Phase 8: SMS Announcement Templates
+- [x] Create database schema for SMS templates (4 tables)
+- [x] Build SMS template backend service with CRUD operations
+- [x] Create tRPC router for template management (11 procedures)
+- [x] Build SMS template management UI page with Rentala glassmorphism design
+- [x] Integrate templates with bulk SMS campaigns
+- [x] Write comprehensive tests for template system (27 tests passing)
+- [x] Support template categories (maintenance, payment, announcement, emergency, other)
+- [x] Implement search and filtering by category
+- [x] Add template duplication functionality
+- [x] Support template variables for personalization
+- [x] Add SMS templates route to App.tsx

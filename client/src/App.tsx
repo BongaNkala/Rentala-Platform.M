@@ -34,6 +34,7 @@ import NotificationPreferences from "./pages/NotificationPreferences";
 import TenantPaymentPortal from "./pages/TenantPaymentPortal";
 import SMSPreferences from "./pages/SMSPreferences";
 import BulkSMSCampaigns from "./pages/BulkSMSCampaigns";
+import SMSTemplates from "./pages/SMSTemplates";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, loading } = useAuth();
@@ -124,6 +125,7 @@ export default function App() {
             <Route path="/tenant-payments" component={() => <ProtectedRoute component={TenantPaymentPortal} />} />
             <Route path="/sms-preferences" component={() => <ProtectedRoute component={SMSPreferences} />} />
             <Route path="/bulk-sms-campaigns" component={() => <ProtectedRoute component={BulkSMSCampaigns} />} />
+            <Route path="/sms-templates" component={() => <ProtectedRoute component={SMSTemplates} />} />
             <Route component={NotFound} />
           </Switch>
         </TooltipProvider>
